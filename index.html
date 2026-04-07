@@ -6,7 +6,6 @@
     <title>Electra Premium | High-End Electronic Gadgets</title>
     <meta name="description" content="Discover the next level of technology with Electra Premium. Specialized in headphones, mobile phones, tablets, and high-quality displays.">
     <link rel="stylesheet" href="styles.css">
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 </head>
@@ -43,44 +42,12 @@
         <div class="cart-footer">
             <div class="total-container">
                 <span>Total:</span>
-                <span id="cart-total">$0.00</span>
+                <span id="cart-total">₹0</span>
             </div>
-            <button class="checkout-btn" onclick="openCheckout()">Proceed to Checkout</button>
+            <button class="checkout-btn" onclick="redirectToRazorpay()">Proceed to Checkout</button>
         </div>
     </div>
     <div id="cart-overlay"></div>
-
-    <!-- Checkout Modal -->
-    <div id="checkout-modal" class="glass">
-        <div class="checkout-header">
-            <h3>Complete Your Order</h3>
-            <button id="close-checkout" onclick="closeCheckout()">&times;</button>
-        </div>
-        <form id="checkout-form" onsubmit="event.preventDefault(); initiatePayment();">
-            <div class="form-group">
-                <label for="cust-name">Full Name</label>
-                <input type="text" id="cust-name" placeholder="John Doe" required>
-            </div>
-            <div class="form-group">
-                <label for="cust-email">Email Address</label>
-                <input type="email" id="cust-email" placeholder="john@example.com" required>
-            </div>
-            <div class="form-group">
-                <label for="cust-phone">Phone Number</label>
-                <input type="tel" id="cust-phone" placeholder="+91 9876543210" required>
-            </div>
-            <div class="form-group">
-                <label for="cust-address">Shipping Address</label>
-                <textarea id="cust-address" rows="3" placeholder="Enter your full address" required></textarea>
-            </div>
-            <div class="checkout-total">
-                <span>Amount to Pay:</span>
-                <span id="checkout-amount">₹0</span>
-            </div>
-            <button type="submit" class="pay-btn">Pay Now & Generate Bill</button>
-        </form>
-    </div>
-    <div id="checkout-overlay"></div>
 
     <main>
         <!-- Hero Section -->
