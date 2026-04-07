@@ -2,7 +2,7 @@ const products = [
     {
         id: 1,
         name: "Pulse X1 Headphones",
-        price: 349.99,
+        price: 9,
         category: "audio",
         image: "assets/hero-headphones.png",
         description: "Adaptive Noise Cancellation with 60-hour battery life."
@@ -10,7 +10,7 @@ const products = [
     {
         id: 2,
         name: "Titan S24 Mobile",
-        price: 1199.99,
+        price: 10,
         category: "mobile",
         image: "assets/titan-s24.png",
         description: "Titanium frame with Pro-level 200MP camera system."
@@ -18,7 +18,7 @@ const products = [
     {
         id: 3,
         name: "Aero Tab Pro",
-        price: 899.99,
+        price: 8,
         category: "tablet",
         image: "assets/aero-tab.png",
         description: "14-inch OLED display for professionals and creators."
@@ -26,7 +26,7 @@ const products = [
     {
         id: 4,
         name: "Vision 8K Display",
-        price: 2499.99,
+        price: 7,
         category: "display",
         image: "assets/vision-8k.png",
         description: "The peak of visual clarity with QD-OLED technology."
@@ -34,7 +34,7 @@ const products = [
     {
         id: 5,
         name: "Echo Buds Gen 3",
-        price: 199.99,
+        price: 6,
         category: "audio",
         image: "assets/echo-buds.png",
         description: "Spatial audio with seamless ecosystem integration."
@@ -66,7 +66,7 @@ function renderProducts(productsToRender) {
                     <span class="category-pill">${product.category}</span>
                     <h3>${product.name}</h3>
                     <p>${product.description}</p>
-                    <span class="price">$${product.price.toFixed(2)}</span>
+                    <span class="price">₹${product.price}</span>
                 </div>
             </div>
         `;
@@ -93,21 +93,21 @@ function updateCart() {
     
     if (cart.length === 0) {
         cartItems.innerHTML = '<p class="empty-msg">Your cart is empty.</p>';
-        cartTotal.innerText = '$0.00';
+        cartTotal.innerText = '₹0';
     } else {
         cartItems.innerHTML = cart.map((item, index) => `
             <div class="cart-item">
                 <img src="${item.image}" alt="${item.name}" onerror="this.src='https://placehold.co/50x50/050505/00B4D8?text=Gadget'">
                 <div class="item-info">
                     <h4>${item.name}</h4>
-                    <span>$${item.price.toFixed(2)}</span>
+                    <span>₹${item.price}</span>
                 </div>
                 <button class="remove-btn" onclick="removeFromCart(${index})">&times;</button>
             </div>
         `).join('');
         
         const total = cart.reduce((sum, item) => sum + item.price, 0);
-        cartTotal.innerText = `$${total.toFixed(2)}`;
+        cartTotal.innerText = `₹${total}`;
     }
 }
 
@@ -170,6 +170,119 @@ function closeSideCart() {
     document.getElementById('cart-sidebar').classList.remove('active');
     document.getElementById('cart-overlay').classList.remove('active');
     document.body.style.overflow = 'auto';
+}
+
+// Checkout and Payment Logic
+window.openCheckout = () => {
+    if (cart.length === 0) {
+        alert("Your cart is empty!");
+        return;
+    }
+    const total = cart.reduce((sum, item) => sum + item.price, 0);
+    document.getElementById('checkout-amount').innerText = `₹${total}`;
+    
+    closeSideCart();
+    document.getElementById('checkout-modal').classList.add('active');
+    document.getElementById('checkout-overlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+};
+
+window.closeCheckout = () => {
+    document.getElementById('checkout-modal').classList.remove('active');
+    document.getElementById('checkout-overlay').classList.remove('active');
+    document.body.style.overflow = 'auto';
+};
+
+window.initiatePayment = () => {
+    const total = cart.reduce((sum, item) => sum + item.price, 0);
+    const name = document.getElementById('cust-name').value;
+    const email = document.getElementById('cust-email').value;
+    const phone = document.getElementById('cust-phone').value;
+    const address = document.getElementById('cust-address').value;
+
+    const options = {
+        "key": "YOUR_RAZORPAY_KEY", // Enter your Live/Test Key here
+        "amount": total * 100, // Amount in paise
+        "currency": "INR",
+        "name": "Electra Premium",
+        "description": "Premium Electronics Purchase",
+        "image": "https://placehold.co/200x200/050505/00B4D8?text=EP",
+        "handler": function (response){
+            alert("Payment Successful! Payment ID: " + response.razorpay_payment_id);
+            const customerDetails = { name, email, phone, address };
+            generatePDFInvoice(response.razorpay_payment_id, customerDetails);
+            
+            // Clear cart and close modal
+            cart = [];
+            updateCart();
+            closeCheckout();
+        },
+        "prefill": {
+            "name": name,
+            "email": email,
+            "contact": phone
+        },
+        "theme": {
+            "color": "#00B4D8"
+        }
+    };
+
+    const rzp1 = new Razorpay(options);
+    rzp1.open();
+};
+
+function generatePDFInvoice(paymentId, customer) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const total = cart.reduce((sum, item) => sum + item.price, 0);
+    const date = new Date().toLocaleDateString();
+
+    // Add Logo / Header
+    doc.setFontSize(22);
+    doc.setTextColor(0, 180, 216);
+    doc.text("ELECTRA PREMIUM", 105, 20, { align: 'center' });
+    
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text("Official Electronics E-Commerce Invoice", 105, 28, { align: 'center' });
+
+    // Customer and Order Info
+    doc.setFontSize(12);
+    doc.setTextColor(0);
+    doc.text(`Invoice Date: ${date}`, 15, 45);
+    doc.text(`Payment ID: ${paymentId}`, 15, 52);
+    
+    doc.setFontSize(14);
+    doc.text("Bill To:", 15, 65);
+    doc.setFontSize(11);
+    doc.text(`Name: ${customer.name}`, 15, 72);
+    doc.text(`Phone: ${customer.phone}`, 15, 79);
+    doc.text(`Email: ${customer.email}`, 15, 86);
+    doc.text(`Address: ${customer.address}`, 15, 93);
+
+    // Table Data
+    const tableData = cart.map(item => [item.name, item.category, `₹${item.price}`]);
+    
+    doc.autoTable({
+        startY: 105,
+        head: [['Product Name', 'Category', 'Price']],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { fillStyle: [0, 180, 216] }
+    });
+
+    const finalY = doc.lastAutoTable.finalY + 10;
+    
+    doc.setFontSize(14);
+    doc.text(`Total Paid: ₹${total}`, 195, finalY, { align: 'right' });
+
+    // Footer
+    doc.setFontSize(10);
+    doc.setTextColor(150);
+    doc.text("Thank you for shopping with Electra Premium!", 105, 285, { align: 'center' });
+
+    // Save PDF
+    doc.save(`Invoice_Electra_${paymentId}.pdf`);
 }
 
 // Animations
