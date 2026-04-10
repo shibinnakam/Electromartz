@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: AWS::Serverless-2016-10-31
+Transform: 'AWS::Serverless-2016-10-31'
 Description: Professional E-Commerce Serverless Application
 
 Globals:
@@ -14,6 +14,18 @@ Globals:
         ORDERS_TABLE: !Ref OrdersTable
         WISHLIST_TABLE: !Ref WishlistTable
         RATINGS_TABLE: !Ref RatingsTable
+        RAZORPAY_KEY_ID: !Ref RazorpayKeyId
+        RAZORPAY_KEY_SECRET: !Ref RazorpayKeySecret
+
+Parameters:
+  RazorpayKeyId:
+    Type: String
+    Description: Razorpay Live Key ID
+    NoEcho: true
+  RazorpayKeySecret:
+    Type: String
+    Description: Razorpay Live Key Secret
+    NoEcho: true
 
 Resources:
   # --- Databases ---
@@ -271,6 +283,21 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref RatingsTable
+
+  VerifyPaymentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/verifyPayment.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /verify-payment
+            Method: post
+            RestApiId: !Ref EcomApi
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref OrdersTable
 
 Outputs:
   ApiUrl:

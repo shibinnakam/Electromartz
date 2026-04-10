@@ -18,6 +18,19 @@ Globals:
           Ref: WishlistTable
         RATINGS_TABLE:
           Ref: RatingsTable
+        RAZORPAY_KEY_ID:
+          Ref: RazorpayKeyId
+        RAZORPAY_KEY_SECRET:
+          Ref: RazorpayKeySecret
+Parameters:
+  RazorpayKeyId:
+    Type: String
+    Description: Razorpay Live Key ID
+    NoEcho: true
+  RazorpayKeySecret:
+    Type: String
+    Description: Razorpay Live Key Secret
+    NoEcho: true
 Resources:
   ProductsTable:
     Type: AWS::Serverless::SimpleTable
@@ -299,6 +312,25 @@ Resources:
       CodeUri: RatingsFunction
     Metadata:
       SamResourceId: RatingsFunction
+  VerifyPaymentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/verifyPayment.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /verify-payment
+            Method: post
+            RestApiId:
+              Ref: EcomApi
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: OrdersTable
+      CodeUri: VerifyPaymentFunction
+    Metadata:
+      SamResourceId: VerifyPaymentFunction
 Outputs:
   ApiUrl:
     Description: API Gateway endpoint URL

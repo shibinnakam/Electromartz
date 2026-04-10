@@ -1,9 +1,9 @@
 // --- Configuration (Same as app.js) ---
 const AWS_CONFIG = {
     region: 'ap-south-1',
-    userPoolId: 'ap-south-1_paEQTXF85',
-    clientId: '48j8ip6e7tl453hql34pbqchcf',
-    apiUrl: 'https://7o7zyf7ts2.execute-api.ap-south-1.amazonaws.com/Prod/'
+    userPoolId: 'ap-south-1_1CmJ2GeNh',
+    clientId: '42dovnuj79hnha44se0r9q52d7',
+    apiUrl: 'https://diixpyzogj.execute-api.ap-south-1.amazonaws.com/Prod/'
 };
 
 let products = [];

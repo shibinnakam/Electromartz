@@ -2,9 +2,9 @@
 // Note: REPLACE these values with your actual AWS resource IDs after deployment
 const AWS_CONFIG = {
     region: 'ap-south-1',
-    userPoolId: 'ap-south-1_paEQTXF85',
-    clientId: '48j8ip6e7tl453hql34pbqchcf',
-    apiUrl: 'https://7o7zyf7ts2.execute-api.ap-south-1.amazonaws.com/Prod/'
+    userPoolId: 'ap-south-1_1CmJ2GeNh',
+    clientId: '42dovnuj79hnha44se0r9q52d7',
+    apiUrl: 'https://diixpyzogj.execute-api.ap-south-1.amazonaws.com/Prod/'
 };
 
 // --- State Management ---
@@ -174,18 +174,17 @@ window.redirectToRazorpay = async () => {
         return;
     }
 
-    // Check profile completion (Now needs at least one address)
     if (savedAddresses.length === 0) {
         alert("Please add a shipping address before proceeding to checkout.");
         openDashboard('addresses');
         return;
     }
 
-    // Professional touch: Save the order to DB first
     try {
         const token = await getToken();
         const total = cart.reduce((s, i) => s + i.price, 0);
         
+        // 1. Create Internal and Razorpay Order
         const res = await fetch(`${AWS_CONFIG.apiUrl}orders`, {
             method: 'POST',
             headers: { 
@@ -198,20 +197,73 @@ window.redirectToRazorpay = async () => {
                 shippingDetails: {
                     name: userProfile.name,
                     phone: userProfile.phone_number,
-                    address: savedAddresses[0].address, // Use first as default for now
+                    address: savedAddresses[0].address,
                     pincode: savedAddresses[0].pincode,
                     city: savedAddresses[0].city
                 }
             })
         });
 
-        if (res.ok) {
-            // Success - proceed to pay
-            window.location.href = "https://rzp.io/rzp/2p6WRt4e";
-        }
+        if (!res.ok) throw new Error("Failed to create order on server");
+        const orderData = await res.json();
+
+        // 2. Initialize Razorpay Checkout
+        const options = {
+            "key": orderData.razorpayKey, 
+            "amount": Math.round(total * 100),
+            "currency": "INR",
+            "name": "ELECTROMARTZ",
+            "description": "Premium Electronics Purchase",
+            "order_id": orderData.razorpayOrderId,
+            "handler": async function (response) {
+                // 3. Verify Payment on Success
+                try {
+                    const verifyRes = await fetch(`${AWS_CONFIG.apiUrl}verify-payment`, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                            orderId: orderData.orderId
+                        })
+                    });
+
+                    if (verifyRes.ok) {
+                        alert("Payment Successful! Your order has been placed.");
+                        cart = [];
+                        updateCart();
+                        openDashboard('orders');
+                    } else {
+                        alert("Payment verification failed. Please contact support.");
+                    }
+                } catch (err) {
+                    console.error("Verification error:", err);
+                    alert("Error verifying payment.");
+                }
+            },
+            "prefill": {
+                "name": userProfile.name,
+                "email": currentUser.attributes?.email,
+                "contact": userProfile.phone_number
+            },
+            "theme": {
+                "color": "#00B4D8"
+            }
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.on('payment.failed', function (response) {
+            alert(`Payment Failed: ${response.error.description}`);
+        });
+        rzp.open();
+
     } catch (err) { 
-        console.error("Could not sync order", err); 
-        alert("There was an error processing your order. Please try again.");
+        console.error("Checkout error:", err); 
+        alert("There was an error initiating checkout. Please try again.");
     }
 };
 
