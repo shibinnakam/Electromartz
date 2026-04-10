@@ -1,0 +1,779 @@
+// --- Configuration ---
+// Note: REPLACE these values with your actual AWS resource IDs after deployment
+const AWS_CONFIG = {
+    region: 'ap-south-1',
+    userPoolId: 'ap-south-1_paEQTXF85',
+    clientId: '48j8ip6e7tl453hql34pbqchcf',
+    apiUrl: 'https://7o7zyf7ts2.execute-api.ap-south-1.amazonaws.com/Prod/'
+};
+
+// --- State Management ---
+let products = [];
+let categories = [];
+let cart = [];
+let currentUser = null;
+let userProfile = {};
+let savedAddresses = []; // List of address objects
+let wishlist = []; // Store product IDs
+
+// --- AWS Cognito Setup ---
+const poolData = {
+    UserPoolId: AWS_CONFIG.userPoolId,
+    ClientId: AWS_CONFIG.clientId
+};
+const userPool = (poolData.UserPoolId !== 'YOUR_USER_POOL_ID') ? new AmazonCognitoIdentity.CognitoUserPool(poolData) : null;
+
+// --- Initialize ---
+document.addEventListener('DOMContentLoaded', () => {
+    initApp();
+});
+
+async function initApp() {
+    setupEventListeners();
+    await checkUserSession();
+    await loadInitialData();
+    setupIntersectionObserver();
+}
+
+async function loadInitialData() {
+    try {
+        await Promise.all([
+            fetchProducts(),
+            fetchCategories()
+        ]);
+    } catch (err) {
+        console.warn("Using fallback data. Please check your API configuration.");
+        products = [
+            { id: '1', name: "Pulse X1", price: 9, category: "audio", image: "assets/hero-headphones.png", description: "fallback" }
+        ];
+        renderProducts(products);
+    }
+}
+
+// --- Data Fetching ---
+async function fetchProducts() {
+    const res = await fetch(`${AWS_CONFIG.apiUrl}products`);
+    products = await res.json();
+    renderProducts(products);
+}
+
+async function fetchCategories() {
+    const res = await fetch(`${AWS_CONFIG.apiUrl}categories`);
+    categories = await res.json();
+    updateCategoryUI();
+}
+
+// --- Rendering ---
+function renderProducts(productsToRender) {
+    const productGrid = document.getElementById('product-grid');
+    if (!productGrid) return;
+    productGrid.innerHTML = '';
+
+    window.filterByCat = (category) => {
+        const filtered = products.filter(p => p.category.toLowerCase().includes(category.toLowerCase()));
+        renderProducts(filtered);
+    };
+
+    productsToRender.forEach(product => {
+        const isInWishlist = wishlist.includes(product.id);
+        const productCard = `
+            <div class="product-card hidden" data-id="${product.id}" onclick="addToRecentlyViewed('${product.id}')">
+                <div class="product-img">
+                    <img src="${product.image}" alt="${product.name}" onerror="this.src='https://placehold.co/400x400/fff/3B82F6?text=${product.name.replace(' ', '+')}'">
+                    <button class="wishlist-btn ${isInWishlist ? 'active' : ''}" onclick="toggleWishlist(event, '${product.id}')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="${isInWishlist ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.78-8.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                    </button>
+                    <button class="add-btn" onclick="addToCart(event, '${product.id}')">Add to Cart</button>
+                </div>
+                <div class="product-info">
+                    <div class="interactive-rating" data-id="${product.id}">
+                        ${[1,2,3,4,5].map(s => `<span class="star" onclick="submitRating(event, '${product.id}', ${s})">★</span>`).join('')}
+                    </div>
+                    <h3>${product.name}</h3>
+                    <span class="price" style="color: var(--accent-primary); font-size: 1.2rem;">₹${product.price}</span>
+                </div>
+            </div>
+        `;
+        productGrid.innerHTML += productCard;
+    });
+    setupIntersectionObserver();
+}
+
+function updateCategoryUI() {
+    // Update filter tabs
+    const filterContainer = document.querySelector('.filter-tabs');
+    if (filterContainer) {
+        let html = '<button class="filter-tab active" data-filter="all">All</button>';
+        categories.forEach(cat => {
+            html += `<button class="filter-tab" data-filter="${cat.name}">${cat.name}</button>`;
+        });
+        filterContainer.innerHTML = html;
+        setupFilterListeners();
+    }
+
+    // Update Admin dropdown
+    const catSelect = document.getElementById('p-category');
+    if (catSelect) {
+        catSelect.innerHTML = '<option value="">Select Category</option>' + 
+            categories.map(cat => `<option value="${cat.name}">${cat.name}</option>`).join('');
+    }
+}
+
+// --- Cart Functionality ---
+window.addToCart = (e, productId) => {
+    if (e) e.stopPropagation();
+    const product = products.find(p => p.id === productId);
+    if (product) {
+        cart.push(product);
+        updateCart();
+        openCart();
+    }
+};
+
+function updateCart() {
+    const cartItems = document.getElementById('cart-items');
+    const cartCount = document.getElementById('cart-count');
+    const cartTotal = document.getElementById('cart-total');
+
+    cartCount.innerText = cart.length;
+
+    if (cart.length === 0) {
+        cartItems.innerHTML = '<p class="empty-msg">Your cart is empty.</p>';
+        cartTotal.innerText = '₹0';
+    } else {
+        cartItems.innerHTML = cart.map((item, index) => `
+            <div class="cart-item">
+                <img src="${item.image}" alt="${item.name}" onerror="this.src='https://placehold.co/50x50/050505/00B4D8?text=Gadget'">
+                <div class="item-info">
+                    <h4>${item.name}</h4>
+                    <span>₹${item.price}</span>
+                </div>
+                <button class="remove-btn" onclick="removeFromCart(${index})">&times;</button>
+            </div>
+        `).join('');
+
+        const total = cart.reduce((sum, item) => sum + item.price, 0);
+        cartTotal.innerText = `₹${total}`;
+    }
+}
+
+window.removeFromCart = (index) => {
+    cart.splice(index, 1);
+    updateCart();
+};
+
+window.redirectToRazorpay = async () => {
+    if (cart.length === 0) {
+        alert("Your cart is empty!");
+        return;
+    }
+
+    if (!currentUser) {
+        alert("Please login to proceed to checkout.");
+        openAuthModal();
+        return;
+    }
+
+    // Check profile completion (Now needs at least one address)
+    if (savedAddresses.length === 0) {
+        alert("Please add a shipping address before proceeding to checkout.");
+        openDashboard('addresses');
+        return;
+    }
+
+    // Professional touch: Save the order to DB first
+    try {
+        const token = await getToken();
+        const total = cart.reduce((s, i) => s + i.price, 0);
+        
+        const res = await fetch(`${AWS_CONFIG.apiUrl}orders`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                items: cart,
+                totalAmount: total,
+                shippingDetails: {
+                    name: userProfile.name,
+                    phone: userProfile.phone_number,
+                    address: savedAddresses[0].address, // Use first as default for now
+                    pincode: savedAddresses[0].pincode,
+                    city: savedAddresses[0].city
+                }
+            })
+        });
+
+        if (res.ok) {
+            // Success - proceed to pay
+            window.location.href = "https://rzp.io/rzp/2p6WRt4e";
+        }
+    } catch (err) { 
+        console.error("Could not sync order", err); 
+        alert("There was an error processing your order. Please try again.");
+    }
+};
+
+// --- Auth Logic ---
+async function checkUserSession() {
+    if (!userPool) return;
+    const cognitoUser = userPool.getCurrentUser();
+    if (cognitoUser) {
+        cognitoUser.getSession(async (err, session) => {
+            if (session && session.isValid()) {
+                currentUser = cognitoUser;
+                await fetchUserProfile();
+                updateAuthUI(true);
+                checkAdminAccess(session);
+            } else {
+                updateAuthUI(false);
+            }
+        });
+    }
+}
+
+async function fetchUserProfile() {
+    return new Promise((resolve) => {
+        currentUser.getUserAttributes((err, attributes) => {
+            if (err) return resolve();
+            
+            const profile = {};
+            attributes.forEach(attr => {
+                const key = attr.getName().replace('custom:', '');
+                profile[key] = attr.getValue();
+            });
+            userProfile = profile;
+            
+            // Handle Multiple Addresses
+            try {
+                savedAddresses = profile.addresses ? JSON.parse(profile.addresses) : [];
+            } catch (e) {
+                savedAddresses = [];
+            }
+            
+            fillProfileForm();
+            renderAddresses();
+            resolve();
+        });
+    });
+}
+
+function fillProfileForm() {
+    const fields = {
+        'p-name-field': 'name',
+        'p-phone-field': 'phone_number',
+        'p-address-field': 'address',
+        'p-pincode-field': 'pincode',
+        'p-landmark-field': 'landmark'
+    };
+    for (const [id, key] of Object.entries(fields)) {
+        const el = document.getElementById(id);
+        if (el) el.value = userProfile[key] || '';
+    }
+}
+
+function getToken() {
+    return new Promise((resolve, reject) => {
+        if (!currentUser) return reject("No user logged in");
+        currentUser.getSession((err, session) => {
+            if (err) reject(err);
+            else resolve(session.getIdToken().getJwtToken());
+        });
+    });
+}
+
+function updateAuthUI(isLoggedIn) {
+    const userSection = document.getElementById('user-section');
+    if (isLoggedIn && currentUser) {
+        userSection.innerHTML = `
+            <div class="user-info-group" style="display:flex; align-items:center; gap:0.5rem">
+                <button onclick="openDashboard('profile')" class="user-pill" style="display:flex; align-items:center; gap:0.5rem; background:#f1f5f9; padding:0.5rem 1rem; border-radius:20px; font-weight:600; border:none; cursor:pointer;">
+                    <span>${userProfile.name ? userProfile.name.split(' ')[0] : 'Account'}</span>
+                </button>
+                <div id="admin-badge-container" style="display:inline-block"></div>
+                <button onclick="handleLogout()" style="color:var(--text-secondary); font-size:0.8rem; border:none; background:none; cursor:pointer; font-weight:500;">Logout</button>
+            </div>
+        `;
+        
+        // Personalize Navbar Links
+        const navLinks = document.querySelector('.nav-links');
+        if (navLinks) {
+            navLinks.innerHTML = `
+                <li><a href="#hero">Home</a></li>
+                <li><a href="#products">Store</a></li>
+                <li><a href="javascript:openDashboard('wishlist')">Wishlist</a></li>
+                <li><a href="javascript:openDashboard('orders')">Orders</a></li>
+            `;
+        }
+
+        // Personalize Hero
+        const heroTitle = document.querySelector('#hero h1');
+        if (heroTitle) {
+            heroTitle.innerHTML = `Welcome back, <br>${userProfile.name ? userProfile.name.split(' ')[0] : 'Technophile'}.`;
+        }
+        
+        fetchWishlist();
+    } else {
+        userSection.innerHTML = `<button id="login-btn" onclick="openAuthModal()" class="btn secondary" style="padding: 0.5rem 1rem;">Login</button>`;
+    }
+}
+
+// --- Wishlist & Ratings & Recently Viewed ---
+
+async function fetchWishlist() {
+    if (!currentUser) return;
+    try {
+        const token = await getToken();
+        const res = await fetch(`${AWS_CONFIG.apiUrl}wishlist`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const items = await res.json();
+        wishlist = items.map(i => i.productId);
+        renderProducts(products); // Refresh with hearts
+        renderWishlistTab();
+    } catch (err) { console.error(err); }
+}
+
+window.toggleWishlist = async (e, productId) => {
+    e.stopPropagation();
+    if (!currentUser) { openAuthModal(); return; }
+    
+    try {
+        const token = await getToken();
+        const res = await fetch(`${AWS_CONFIG.apiUrl}wishlist`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId })
+        });
+        const result = await res.json();
+        if (result.action === 'added') wishlist.push(productId);
+        else wishlist = wishlist.filter(id => id !== productId);
+        
+        renderProducts(products);
+        renderWishlistTab();
+    } catch (err) { console.error(err); }
+};
+
+window.submitRating = async (e, productId, rating) => {
+    e.stopPropagation();
+    if (!currentUser) { openAuthModal(); return; }
+    
+    try {
+        const token = await getToken();
+        await fetch(`${AWS_CONFIG.apiUrl}ratings`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId, rating })
+        });
+        alert("Thanks for your rating!");
+    } catch (err) { console.error(err); }
+};
+
+window.addToRecentlyViewed = (productId) => {
+    recentlyViewed = recentlyViewed.filter(id => id !== productId);
+    recentlyViewed.unshift(productId);
+    recentlyViewed = recentlyViewed.slice(0, 5); // Keep last 5
+    localStorage.setItem('recentlyViewed', JSON.stringify(recentlyViewed));
+    renderRecentlyViewedTab();
+};
+
+function renderWishlistTab() {
+    const container = document.getElementById('wishlist-items-list');
+    if (!container) return;
+    const items = products.filter(p => wishlist.includes(p.id));
+    if (items.length === 0) {
+        container.innerHTML = '<p class="empty-msg">Your wishlist is empty.</p>';
+        return;
+    }
+    container.innerHTML = items.map(p => `
+        <div class="arrival-mini">
+            <img src="${p.image}" alt="${p.name}">
+            <div class="mini-info">
+                <h4>${p.name}</h4>
+                <span class="mini-price">₹${p.price}</span>
+                <button onclick="addToCart(event, '${p.id}')" class="btn primary" style="padding:0.4rem 0.8rem; font-size:0.7rem; margin-top:0.5rem; width:fit-content">Add to Cart</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderRecentlyViewedTab() {
+    const container = document.getElementById('recent-items-list');
+    if (!container) return;
+    const items = recentlyViewed.map(id => products.find(p => p.id === id)).filter(p => p);
+    if (items.length === 0) {
+        container.innerHTML = '<p class="empty-msg">No recently viewed items.</p>';
+        return;
+    }
+    container.innerHTML = items.map(p => `
+        <div class="arrival-mini" onclick="window.location.href='#products'">
+            <img src="${p.image}" alt="${p.name}">
+            <div class="mini-info">
+                <h4>${p.name}</h4>
+                <span class="mini-price">₹${p.price}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+function checkAdminAccess(session) {
+    const groups = session.getIdToken().payload['cognito:groups'] || [];
+    if (groups.includes('Admins')) {
+        const badgeContainer = document.getElementById('admin-badge-container');
+        if (badgeContainer) badgeContainer.innerHTML = `<span class="admin-badge" onclick="window.location.href='admin.html'" style="cursor:pointer">Admin Panel</span>`;
+    }
+}
+
+window.handleLogout = () => {
+    if (currentUser) {
+        currentUser.signOut();
+        window.location.reload();
+    }
+};
+
+// --- Auth UI Interactions ---
+window.openAuthModal = () => document.getElementById('auth-modal').classList.add('active');
+window.closeAuthModal = () => document.getElementById('auth-modal').classList.remove('active');
+
+window.toggleAuthMode = (mode) => {
+    document.getElementById('login-form-container').style.display = mode === 'login' ? 'block' : 'none';
+    document.getElementById('signup-form-container').style.display = mode === 'signup' ? 'block' : 'none';
+    document.getElementById('verify-form-container').style.display = mode === 'verify' ? 'block' : 'none';
+};
+
+document.getElementById('login-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+
+    const authData = { Username: email, Password: password };
+    const authDetails = new AmazonCognitoIdentity.AuthenticationDetails(authData);
+    const cognitoUser = new AmazonCognitoIdentity.CognitoUser({ Username: email, Pool: userPool });
+
+    cognitoUser.authenticateUser(authDetails, {
+        onSuccess: (result) => {
+            window.location.reload();
+        },
+        onFailure: (err) => {
+            alert(err.message || JSON.stringify(err));
+        }
+    });
+});
+
+document.getElementById('signup-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-password').value;
+
+    const attributeList = [
+        new AmazonCognitoIdentity.CognitoUserAttribute({ Name: 'email', Value: email })
+    ];
+
+    signupEmail = email; // Store for verification
+    userPool.signUp(email, password, attributeList, null, (err, result) => {
+        if (err) {
+            alert(err.message || JSON.stringify(err));
+            return;
+        }
+        toggleAuthMode('verify');
+    });
+});
+
+document.getElementById('verify-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const code = document.getElementById('verify-code').value;
+    const cognitoUser = new AmazonCognitoIdentity.CognitoUser({ Username: signupEmail, Pool: userPool });
+
+    cognitoUser.confirmRegistration(code, true, (err, result) => {
+        if (err) {
+            alert(err.message || JSON.stringify(err));
+            return;
+        }
+        alert('Verification successful! You can now log in.');
+        toggleAuthMode('login');
+    });
+});
+
+// Admin modal logic removed (see admin.js)
+
+// Tab logic moved to admin.js
+
+// Removed add-product and add-category form listeners (moved to admin.js)
+
+// --- UI Interactions (Existing) ---
+function setupEventListeners() {
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            navbar.style.background = 'rgba(255, 255, 255, 0.95)';
+            navbar.style.borderBottom = '1px solid rgba(0, 0, 0, 0.05)';
+        } else {
+            navbar.style.background = 'var(--glass-bg)';
+            navbar.style.borderBottom = 'none';
+        }
+    });
+
+    document.getElementById('cart-btn').addEventListener('click', openCart);
+    document.getElementById('close-cart').addEventListener('click', closeSideCart);
+    document.getElementById('cart-overlay').addEventListener('click', closeSideCart);
+
+    // Address Form Listener
+    document.getElementById('add-address-form')?.addEventListener('submit', handleAddAddress);
+}
+
+function setupFilterListeners() {
+    const filterTabs = document.querySelectorAll('.filter-tab');
+    filterTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            filterTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            const category = tab.getAttribute('data-filter');
+            if (category === 'all') {
+                renderProducts(products);
+            } else {
+                const filtered = products.filter(p => p.category === category);
+                renderProducts(filtered);
+            }
+        });
+    });
+}
+
+function openCart() {
+    document.getElementById('cart-sidebar').classList.add('active');
+    document.getElementById('cart-overlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeSideCart() {
+    document.getElementById('cart-sidebar').classList.remove('active');
+    document.getElementById('cart-overlay').classList.remove('active');
+    document.body.style.overflow = 'auto';
+}
+
+// --- Dashboard logic ---
+window.openDashboard = async (tabId = 'profile') => {
+    document.getElementById('user-dashboard-modal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    switchDashTab(tabId);
+    if (tabId === 'orders') await fetchUserOrders();
+    if (tabId === 'wishlist') await fetchWishlist();
+    if (tabId === 'recent') renderRecentlyViewedTab();
+};
+
+window.closeDashboard = () => {
+    document.getElementById('user-dashboard-modal').classList.remove('active');
+    document.body.style.overflow = 'auto';
+};
+
+window.switchDashTab = (tabId) => {
+    // Hide all sections
+    document.querySelectorAll('.dash-section').forEach(s => s.classList.remove('active'));
+    // Deactivate all sidebar buttons
+    document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
+    
+    // Show target section
+    const targetSection = document.getElementById(`${tabId}-tab`);
+    if (targetSection) targetSection.classList.add('active');
+    
+    // Activate target sidebar button
+    const targetBtn = document.getElementById(`${tabId}-tab-btn`);
+    if (targetBtn) targetBtn.classList.add('active');
+};
+
+document.getElementById('profile-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button');
+    btn.innerText = "Saving...";
+    btn.disabled = true;
+
+    const attributes = [
+        { Name: 'name', Value: document.getElementById('p-name-field').value },
+        { Name: 'phone_number', Value: document.getElementById('p-phone-field').value }
+    ];
+
+    const cognitoAttributes = attributes.map(a => new AmazonCognitoIdentity.CognitoUserAttribute(a));
+
+    currentUser.updateAttributes(cognitoAttributes, (err, result) => {
+        btn.innerText = "Save Profile Changes";
+        btn.disabled = false;
+        if (err) {
+            alert(err.message || JSON.stringify(err));
+            return;
+        }
+        alert("Profile updated successfully!");
+        fetchUserProfile();
+        updateAuthUI(true);
+    });
+});
+
+async function fetchUserOrders() {
+    try {
+        const token = await getToken();
+        const res = await fetch(`${AWS_CONFIG.apiUrl}orders`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const orders = await res.json();
+        renderUserOrders(orders);
+    } catch (err) {
+        console.error("Failed to fetch orders", err);
+    }
+}
+
+function renderUserOrders(orders) {
+    const container = document.getElementById('user-orders-list');
+    if (!container) return;
+
+    if (!orders || orders.length === 0) {
+        container.innerHTML = '<p class="empty-msg">No orders found yet.</p>';
+        return;
+    }
+
+    container.innerHTML = orders.slice().reverse().map(order => `
+        <div class="order-card">
+            <div class="order-top">
+                <span class="order-id">#${order.orderId.substring(0, 10)}...</span>
+                <span class="admin-badge" style="background:${order.status === 'Pending' ? '#ffaa00' : '#07c160'}">${order.status}</span>
+            </div>
+            <div class="order-items">
+                ${order.items.map(item => `
+                    <div class="order-item-mini">
+                        <span>${item.name}</span>
+                        <span>₹${item.price}</span>
+                    </div>
+                `).join('')}
+            </div>
+            <div class="order-footer">
+                <div class="order-total">Total: ₹${order.totalAmount}</div>
+                <button class="view-invoice" onclick='generateInvoice(${JSON.stringify(order).replace(/'/g, "&apos;")})'>
+                    Download Invoice
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+window.generateInvoice = (order) => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Header
+    doc.setFontSize(22);
+    doc.setTextColor(0, 180, 216); // Accent color
+    doc.text("ELECTROMARTZ", 20, 20);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text("Premium Electronic Gadgets", 20, 28);
+    doc.text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`, 140, 20);
+    doc.text(`Order ID: ${order.orderId}`, 140, 28);
+
+    doc.setDrawColor(200);
+    doc.line(20, 35, 190, 35);
+
+    // Shipping Info
+    doc.setFontSize(12);
+    doc.setTextColor(0);
+    doc.text("Bill To:", 20, 45);
+    doc.setFontSize(10);
+    doc.text(order.shippingDetails?.name || "Customer", 20, 52);
+    doc.text(order.shippingDetails?.address || "No address provided", 20, 58, { maxWidth: 60 });
+    doc.text(`Phone: ${order.shippingDetails?.phone || "N/A"}`, 20, 68);
+
+    // Items Table
+    const tableData = order.items.map(i => [i.name, 1, `₹${i.price}`, `₹${i.price}`]);
+    doc.autoTable({
+        startY: 80,
+        head: [['Item', 'Qty', 'Unit Price', 'Total']],
+        body: tableData,
+        theme: 'grid',
+        headStyles: { fillColor: [0, 180, 216] }
+    });
+
+    // Summary
+    const finalY = doc.lastAutoTable.finalY + 10;
+    doc.setFontSize(12);
+    doc.text(`Total Amount: ₹${order.totalAmount}`, 140, finalY);
+
+    // Footer
+    doc.setFontSize(10);
+    doc.setTextColor(150);
+    doc.text("Thank you for shopping with Electra Premium!", 60, finalY + 30);
+
+    doc.save(`Invoice_${order.orderId.substring(0, 8)}.pdf`);
+};
+
+// --- Address Management ---
+window.openAddAddressModal = () => document.getElementById('address-modal').classList.add('active');
+window.closeAddressModal = () => document.getElementById('address-modal').classList.remove('active');
+
+async function handleAddAddress(e) {
+    e.preventDefault();
+    const newAddr = {
+        id: Date.now(),
+        type: document.getElementById('addr-type').value,
+        address: document.getElementById('addr-field').value,
+        pincode: document.getElementById('addr-pincode').value,
+        city: document.getElementById('addr-city').value
+    };
+
+    savedAddresses.push(newAddr);
+    await syncAddresses();
+    closeAddressModal();
+    renderAddresses();
+}
+
+async function syncAddresses() {
+    if (!currentUser) return;
+    const attributes = [{ Name: 'custom:addresses', Value: JSON.stringify(savedAddresses) }];
+    const cognitoAttributes = attributes.map(a => new AmazonCognitoIdentity.CognitoUserAttribute(a));
+
+    return new Promise((resolve, reject) => {
+        currentUser.updateAttributes(cognitoAttributes, (err, result) => {
+            if (err) reject(err);
+            else resolve(result);
+        });
+    });
+}
+
+function renderAddresses() {
+    const container = document.getElementById('address-list');
+    if (!container) return;
+
+    if (savedAddresses.length === 0) {
+        container.innerHTML = '<p class="empty-msg">No saved addresses yet.</p>';
+        return;
+    }
+
+    container.innerHTML = savedAddresses.map(addr => `
+        <div class="arrival-mini" style="border: 1px solid #eee; padding: 1rem; position: relative;">
+            <div class="mini-info">
+                <span class="admin-badge" style="background:#f1f5f9; color:#64748b; margin-bottom:0.5rem">${addr.type}</span>
+                <p style="font-size:0.9rem; color:var(--text-primary); margin:0.3rem 0;">${addr.address}</p>
+                <p style="font-size:0.8rem; color:var(--text-secondary)">${addr.city} - ${addr.pincode}</p>
+            </div>
+            <button onclick="deleteAddress(${addr.id})" style="position:absolute; top:1rem; right:1rem; color:#ef4444; font-size:0.8rem;">Delete</button>
+        </div>
+    `).join('');
+}
+
+window.deleteAddress = async (id) => {
+    savedAddresses = savedAddresses.filter(a => a.id !== id);
+    await syncAddresses();
+    renderAddresses();
+};
+
+// --- Smooth Reveal ---
+function setupIntersectionObserver() {
+    const options = { threshold: 0.1 };
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('show');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, options);
+    document.querySelectorAll('.hidden').forEach(el => observer.observe(el));
+}

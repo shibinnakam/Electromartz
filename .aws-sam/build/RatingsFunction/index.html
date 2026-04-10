@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ELECTROMARTZ | High-End Electronic Gadgets</title>
+    <meta name="description" content="Discover the next level of technology with ELECTROMARTZ. Specialized in headphones, mobile phones, tablets, and high-quality displays.">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <!-- AWS SDKs -->
+    <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.1/dist/amazon-cognito-identity.min.js"></script>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav id="navbar" class="glass">
+        <div class="container nav-container">
+            <a href="#" class="logo">ELECTRO<span>MARTZ</span></a>
+            <ul class="nav-links">
+                <li><a href="#hero">Home</a></li>
+                <li><a href="#categories">Categories</a></li>
+                <li><a href="#products">Store</a></li>
+                <li><a href="#footer">Contact</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button id="cart-btn" class="cart-trigger">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                    <span id="cart-count">0</span>
+                </button>
+                <div id="user-section" class="user-profile">
+                    <button id="login-btn" onclick="openAuthModal()" class="btn secondary" style="padding: 0.5rem 1rem;">Login</button>
+                    <!-- Logged in state injected by JS -->
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Cart Sidebar Overlay -->
+    <div id="cart-sidebar" class="glass">
+        <div class="cart-header">
+            <h3>Your Cart</h3>
+            <button id="close-cart">&times;</button>
+        </div>
+        <div id="cart-items">
+            <!-- Items injected by JS -->
+            <p class="empty-msg">Your cart is empty.</p>
+        </div>
+        <div class="cart-footer">
+            <div class="total-container">
+                <span>Total:</span>
+                <span id="cart-total">₹0</span>
+            </div>
+            <button class="checkout-btn" onclick="redirectToRazorpay()">Proceed to Checkout</button>
+        </div>
+    </div>
+    <div id="cart-overlay"></div>
+
+    <main>
+        <section id="hero" class="section-bg-alt" style="padding: 6rem 0; overflow: hidden;">
+            <div class="container hero-container" style="display: flex; align-items: center; justify-content: space-between;">
+                <div class="hero-content hidden" style="flex: 1;">
+                    <span style="color: var(--accent-red); font-weight: 700; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 2px;">★ Top Products Of The Month</span>
+                    <h1 style="font-size: 4rem; margin: 1.5rem 0; line-height: 1.1;">Micropack MHP <br>Headphone Black</h1>
+                    <p style="font-size: 1.1rem; color: var(--text-secondary); max-width: 500px; margin-bottom: 2.5rem;">The Micropack Headphone offers a stereo PC headset, with volume control, a flexible mic arm, adjustable headband.</p>
+                    <div class="cta-group">
+                        <a href="#products" class="btn primary">Shop Now →</a>
+                    </div>
+                </div>
+                <div class="hero-image hidden" style="flex: 1; display: flex; justify-content: flex-end; position: relative;">
+                    <img src="hero_light.png" alt="Featured Product" style="max-width: 90%; transform: scale(1.1);">
+                </div>
+            </div>
+        </section>
+
+        <section id="categories" class="section-padding">
+            <div class="container">
+                <div class="section-header hidden">
+                    <h2>Browse by <span>Category</span></h2>
+                </div>
+                <div class="category-row">
+                    <div class="cat-box" onclick="filterByCat('mobile')">
+                        <span class="cat-icon">📱</span>
+                        <span class="cat-name">Phone</span>
+                    </div>
+                    <div class="cat-box" onclick="filterByCat('audio')">
+                        <span class="cat-icon">🎧</span>
+                        <span class="cat-name">Headphone</span>
+                    </div>
+                    <div class="cat-box" onclick="filterByCat('tablet')">
+                        <span class="cat-icon">💻</span>
+                        <span class="cat-name">Laptop</span>
+                    </div>
+                    <div class="cat-box" onclick="filterByCat('watch')">
+                        <span class="cat-icon">⌚</span>
+                        <span class="cat-name">Watch</span>
+                    </div>
+                    <div class="cat-box" onclick="filterByCat('camera')">
+                        <span class="cat-icon">📷</span>
+                        <span class="cat-name">Camera</span>
+                    </div>
+                    <div class="cat-box" onclick="filterByCat('gaming')">
+                        <span class="cat-icon">🎮</span>
+                        <span class="cat-name">Video Game</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Products -->
+        <section id="products" class="section-padding">
+            <div class="container">
+                <div class="section-header hidden" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h2>Featured <span>Products</span></h2>
+                    <a href="#products" class="btn primary" style="font-size: 0.8rem; padding: 0.6rem 1.2rem;">View All Products →</a>
+                </div>
+                <div id="product-grid" class="product-grid">
+                    <!-- Products injected by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- New Arrivals (Split Layout) -->
+        <section id="new-arrivals" class="section-padding section-bg-alt">
+            <div class="container">
+                <div class="section-header hidden" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h2>New <span>Arrivals</span></h2>
+                    <a href="#products" class="btn primary" style="font-size: 0.8rem; padding: 0.6rem 1.2rem;">View All Products →</a>
+                </div>
+                <div class="arrivals-split">
+                    <div class="arrival-large hidden">
+                        <span style="color: var(--accent-red); font-weight: 700; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px;">Summer Collection 2026</span>
+                        <h3 style="font-size: 2.2rem; margin: 1rem 0; line-height: 1.2;">Samsung Galaxy Note20 <br>Ultra 5G</h3>
+                        <button class="btn primary" style="width: fit-content; margin-bottom: 2rem;">Shop Now →</button>
+                        <img src="https://placehold.co/600x400/fff/3B82F6?text=Galaxy+Note20" alt="New Arrival" style="width: 100%; object-fit: contain;">
+                    </div>
+                    <div class="arrival-list">
+                        <div class="arrival-mini hidden">
+                            <img src="https://placehold.co/100x100/fff/3B82F6?text=Watch" alt="Mini">
+                            <div class="mini-info">
+                                <div class="rating">★★★★★</div>
+                                <h4>Olevs Fashion Waterproof</h4>
+                                <span class="mini-price">₹379.00</span>
+                            </div>
+                        </div>
+                        <div class="arrival-mini hidden">
+                            <img src="https://placehold.co/100x100/fff/3B82F6?text=Audio" alt="Mini">
+                            <div class="mini-info">
+                                <div class="rating">★★★★★</div>
+                                <h4>Logitech G320 Gaming</h4>
+                                <span class="mini-price">₹399.00</span>
+                            </div>
+                        </div>
+                        <div class="arrival-mini hidden">
+                            <img src="https://placehold.co/100x100/fff/3B82F6?text=Headset" alt="Mini">
+                            <div class="mini-info">
+                                <div class="rating">★★★★★</div>
+                                <h4>Asus TUF Gaming H70</h4>
+                                <span class="mini-price">₹549.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer id="footer" class="section-padding">
+        <div class="container footer-container">
+            <div class="footer-info">
+                <a href="#" class="logo">ELECTRO<span>MARTZ</span></a>
+                <p>The standard of excellence in personal technology. Crafted for the detail-oriented.</p>
+            </div>
+            <div class="footer-links">
+                <div class="link-col">
+                    <h4>Products</h4>
+                    <ul>
+                        <li><a href="#">Headphones</a></li>
+                        <li><a href="#">Smartphones</a></li>
+                        <li><a href="#">Pro Tablets</a></li>
+                        <li><a href="#">8K Displays</a></li>
+                    </ul>
+                </div>
+                <div class="link-col">
+                    <h2>Login</h2>
+                    <p>Welcome back to ELECTROMARTZ</p>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Ethics</a></li>
+                        <li><a href="#">Privacy</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 ELECTROMARTZ. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Auth Modals -->
+    <div id="auth-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeAuthModal()">&times;</button>
+            <div id="login-form-container">
+                <div class="modal-header">
+                    <h2>Login</h2>
+                    <p>Welcome back to ELECTROMARTZ</p>
+                </div>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label>Email or Username</label>
+                        <input type="text" id="login-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="login-password" required>
+                    </div>
+                    <button type="submit" class="btn primary" style="width:100%">Sign In</button>
+                </form>
+                <p class="auth-switch">Don't have an account? <span onclick="toggleAuthMode('signup')">Sign Up</span></p>
+            </div>
+            <div id="signup-form-container" style="display:none">
+                <div class="modal-header">
+                    <h2>Sign Up</h2>
+                    <p>Join the elite electronics circle</p>
+                </div>
+                <form id="signup-form">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="signup-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="signup-password" required minlength="8">
+                    </div>
+                    <button type="submit" class="btn primary" style="width:100%">Create Account</button>
+                </form>
+                <p class="auth-switch">Already have an account? <span onclick="toggleAuthMode('login')">Login</span></p>
+            </div>
+            <div id="verify-form-container" style="display:none">
+                <div class="modal-header">
+                    <h2>Verify Account</h2>
+                    <p>Enter the 6-digit code sent to your email</p>
+                </div>
+                <form id="verify-form">
+                    <div class="form-group">
+                        <label>Verification Code</label>
+                        <input type="text" id="verify-code" placeholder="123456" required>
+                    </div>
+                    <button type="submit" class="btn primary" style="width:100%">Confirm Code</button>
+                </form>
+                <p class="auth-switch">Back to <span onclick="toggleAuthMode('login')    <!-- User Dashboard Modal -->
+    <div id="user-dashboard-modal" class="modal-overlay">
+        <div class="modal-content dashboard-content" style="max-width: 900px; height: 85vh; display: flex; flex-direction: column;">
+            <button class="modal-close" onclick="closeDashboard()">&times;</button>
+            <div class="dashboard-wrapper" style="display: flex; flex: 1; overflow: hidden;">
+                <aside class="dashboard-sidebar" style="width: 200px; border-right: 1px solid #eee; padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                    <button class="dash-tab active" id="profile-tab-btn" onclick="switchDashTab('profile')">My Profile</button>
+                    <button class="dash-tab" id="orders-tab-btn" onclick="switchDashTab('orders')">Order History</button>
+                    <button class="dash-tab" id="wishlist-tab-btn" onclick="switchDashTab('wishlist')">Wishlist</button>
+                    <button class="dash-tab" id="recent-tab-btn" onclick="switchDashTab('recent')">Recently Viewed</button>
+                </aside>
+                <main class="dashboard-main" style="flex: 1; padding: 2rem; overflow-y: auto;">
+                    <div id="profile-tab" class="dash-section active">
+                        <div class="modal-header">
+                            <h2>Your Profile</h2>
+                            <p>Complete your details for seamless delivery.</p>
+                        </div>
+                        <form id="profile-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Full Name</label>
+                                    <input type="text" id="p-name-field" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Phone Number</label>
+                                    <input type="tel" id="p-phone-field" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Shipping Address</label>
+                                <textarea id="p-address-field" rows="3" required></textarea>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Pincode</label>
+                                    <input type="text" id="p-pincode-field" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Landmark</label>
+                                    <input type="text" id="p-landmark-field" placeholder="e.g. Near Metro Station" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn primary" style="width:100%">Save Profile Changes</button>
+                        </form>
+                    </div>
+
+                    <div id="orders-tab" class="dash-section">
+                        <div class="modal-header">
+                            <h2>Order History</h2>
+                            <p>Track your gadgets and invoices.</p>
+                        </div>
+                        <div id="user-orders-list" class="orders-grid">
+                            <p class="empty-msg">No orders found yet.</p>
+                        </div>
+                    </div>
+
+                    <div id="wishlist-tab" class="dash-section">
+                        <div class="modal-header">
+                            <h2>My Wishlist</h2>
+                            <p>Items you've saved for later.</p>
+                        </div>
+                        <div id="wishlist-items-list" class="wishlist-grid" style="display: grid; gap: 1rem;">
+                            <!-- Wishlist items injected here -->
+                        </div>
+                    </div>
+
+                    <div id="recent-tab" class="dash-section">
+                        <div class="modal-header">
+                            <h2>Recently Viewed</h2>
+                            <p>The tech you've been eye-ing.</p>
+                        </div>
+                        <div id="recent-items-list" class="recent-list" style="display: grid; gap: 1rem;">
+                            <!-- Recently viewed items injected here -->
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+             </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin modal removed. Use admin.html for dashboard. -->
+
+    <script src="app.js"></script>
+</body>
+</html>

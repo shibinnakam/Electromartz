@@ -1,0 +1,279 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Professional E-Commerce Serverless Application
+
+Globals:
+  Function:
+    Runtime: nodejs18.x
+    Timeout: 10
+    MemorySize: 128
+    Environment:
+      Variables:
+        PRODUCTS_TABLE: !Ref ProductsTable
+        CATEGORIES_TABLE: !Ref CategoriesTable
+        ORDERS_TABLE: !Ref OrdersTable
+        WISHLIST_TABLE: !Ref WishlistTable
+        RATINGS_TABLE: !Ref RatingsTable
+
+Resources:
+  # --- Databases ---
+  ProductsTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: id
+        Type: String
+
+  CategoriesTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: name
+        Type: String
+
+  WishlistTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: productId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+        - AttributeName: productId
+          KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST
+
+  RatingsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: productId
+          AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: productId
+          KeyType: HASH
+        - AttributeName: userId
+          KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST
+
+  OrdersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: orderId
+          AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: orderId
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+      GlobalSecondaryIndexes:
+        - IndexName: UserIdIndex
+          KeySchema:
+            - AttributeName: userId
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+
+  # --- Authentication ---
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: EcomUserPool
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: false
+      AutoVerifiedAttributes:
+        - email
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+        - Name: name
+          AttributeDataType: String
+          Mutable: true
+        - Name: phone_number
+          AttributeDataType: String
+          Mutable: true
+        - Name: address
+          AttributeDataType: String
+          Mutable: true
+        - Name: pincode
+          AttributeDataType: String
+          Mutable: true
+        - Name: landmark
+          AttributeDataType: String
+          Mutable: true
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: EcomWebClient
+      UserPoolId: !Ref UserPool
+      ExplicitAuthFlows:
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_USER_PASSWORD_AUTH
+
+  AdminGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      Description: Administrative group for e-commerce
+      GroupName: Admins
+      UserPoolId: !Ref UserPool
+
+  # --- API Gateway ---
+  EcomApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Cors:
+        AllowMethods: "'OPTIONS,GET,POST'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: "'*'"
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+        AddDefaultAuthorizerToCorsPreflight: false
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !GetAtt UserPool.Arn
+
+  # --- Functions ---
+  GetProductsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/getProducts.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /products
+            Method: get
+            RestApiId: !Ref EcomApi
+            Auth:
+              Authorizer: NONE # Public access
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref ProductsTable
+
+  GetCategoriesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/getCategories.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /categories
+            Method: get
+            RestApiId: !Ref EcomApi
+            Auth:
+              Authorizer: NONE # Public access
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref CategoriesTable
+
+  AddProductFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/addProduct.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /products
+            Method: post
+            RestApiId: !Ref EcomApi
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ProductsTable
+
+  AddCategoryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/addCategory.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /categories
+            Method: post
+            RestApiId: !Ref EcomApi
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CategoriesTable
+
+  CreateOrderFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/createOrder.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /orders
+            Method: post
+            RestApiId: !Ref EcomApi
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref OrdersTable
+
+  GetOrdersFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/getOrders.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /orders
+            Method: get
+            RestApiId: !Ref EcomApi
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref OrdersTable
+
+  WishlistFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/wishlist.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /wishlist
+            Method: any
+            RestApiId: !Ref EcomApi
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref WishlistTable
+
+  RatingsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/ratings.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /ratings
+            Method: any
+            RestApiId: !Ref EcomApi
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RatingsTable
+
+Outputs:
+  ApiUrl:
+    Description: "API Gateway endpoint URL"
+    Value: !Sub "https://${EcomApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+  UserPoolId:
+    Value: !Ref UserPool
+  ClientId:
+    Value: !Ref UserPoolClient
