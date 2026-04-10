@@ -710,29 +710,52 @@ window.closeAddressModal = () => document.getElementById('address-modal').classL
 
 async function handleAddAddress(e) {
     e.preventDefault();
-    const newAddr = {
-        id: Date.now(),
-        type: document.getElementById('addr-type').value,
-        address: document.getElementById('addr-field').value,
-        pincode: document.getElementById('addr-pincode').value,
-        city: document.getElementById('addr-city').value
-    };
+    const btn = e.target.querySelector('button');
+    const originalText = btn.innerText;
+    
+    try {
+        btn.innerText = "Saving...";
+        btn.disabled = true;
 
-    savedAddresses.push(newAddr);
-    await syncAddresses();
-    closeAddressModal();
-    renderAddresses();
+        const newAddr = {
+            id: Date.now(),
+            type: document.getElementById('addr-type').value,
+            address: document.getElementById('addr-field').value,
+            pincode: document.getElementById('addr-pincode').value,
+            city: document.getElementById('addr-city').value
+        };
+
+        savedAddresses.push(newAddr);
+        await syncAddresses();
+        
+        closeAddressModal();
+        renderAddresses();
+        alert("Address added successfully!");
+    } catch (err) {
+        console.error("Failed to add address:", err);
+        alert(`Error saving address: ${err.message || 'Please ensure you are logged in and try again.'}`);
+        // Rollback local state on failure
+        savedAddresses.pop();
+    } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }
 }
 
 async function syncAddresses() {
-    if (!currentUser) return;
+    if (!currentUser) throw new Error("User session expired. Please login again.");
+    
     const attributes = [{ Name: 'custom:addresses', Value: JSON.stringify(savedAddresses) }];
     const cognitoAttributes = attributes.map(a => new AmazonCognitoIdentity.CognitoUserAttribute(a));
 
     return new Promise((resolve, reject) => {
         currentUser.updateAttributes(cognitoAttributes, (err, result) => {
-            if (err) reject(err);
-            else resolve(result);
+            if (err) {
+                console.error("Cognito Attribute Update Error:", err);
+                reject(err);
+            } else {
+                resolve(result);
+            }
         });
     });
 }
