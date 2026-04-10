@@ -106,6 +106,9 @@ Resources:
       - Name: landmark
         AttributeDataType: String
         Mutable: true
+      - Name: addresses
+        AttributeDataType: String
+        Mutable: true
   UserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
