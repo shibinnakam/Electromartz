@@ -107,9 +107,18 @@ function renderDashboard() {
     catSelect.innerHTML = '<option value="">Select Category</option>' + 
         categories.map(cat => `<option value="${cat.name}">${cat.name}</option>`).join('');
 
+    const scCatSelect = document.getElementById('sc-category');
+    if (scCatSelect) {
+        scCatSelect.innerHTML = '<option value="">Select Category</option>' + 
+            categories.map(cat => `<option value="${cat.name}">${cat.name}</option>`).join('');
+    }
+
     // Category List Tags
     const catList = document.getElementById('category-list');
-    catList.innerHTML = categories.map(cat => `<span class="category-pill">${cat.name}</span>`).join('');
+    catList.innerHTML = categories.map(cat => {
+        let scList = (cat.subCategories && cat.subCategories.length > 0) ? ` (Sub: ${cat.subCategories.map(s => s.name).join(', ')})` : '';
+        return `<span class="category-pill">${cat.name}${scList}</span>`;
+    }).join('');
 
     // Orders List
     const ordersList = document.getElementById('orders-list');
@@ -155,10 +164,30 @@ function setupEventListeners() {
         }
     });
 
+    // Image utility
+    const getImageData = async (urlInputId, fileInputId) => {
+        const fileInput = document.getElementById(fileInputId);
+        const urlInput = document.getElementById(urlInputId);
+        if (fileInput.files && fileInput.files[0]) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.readAsDataURL(fileInput.files[0]);
+            });
+        }
+        return urlInput.value;
+    };
+
     // Add Category
     document.getElementById('add-category-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const name = document.getElementById('c-name').value;
+        if (!/^[A-Za-z\s]+$/.test(name)) {
+            alert("Invalid category name. Only letters and spaces are allowed.");
+            return;
+        }
+
+        const image = await getImageData('c-image-url', 'c-image-file');
 
         const token = await getToken();
         const res = await fetch(`${AWS_CONFIG.apiUrl}categories`, {
@@ -167,13 +196,49 @@ function setupEventListeners() {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ name })
+            body: JSON.stringify({ name, image })
         });
 
         if (res.ok) {
             alert("Category created!");
             e.target.reset();
             loadData();
+        } else {
+            const err = await res.json();
+            alert(err.message || "Error creating category");
+        }
+    });
+
+    // Add Sub-category
+    document.getElementById('add-subcategory-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const categoryName = document.getElementById('sc-category').value;
+        const subCategoryName = document.getElementById('sc-name').value;
+        
+        if (!/^[A-Za-z\s]+$/.test(subCategoryName)) {
+            alert("Invalid sub-category name. Only letters and spaces are allowed.");
+            return;
+        }
+
+        const image = await getImageData('sc-image-url', 'sc-image-file');
+
+        const token = await getToken();
+        const res = await fetch(`${AWS_CONFIG.apiUrl}categories/${encodeURIComponent(categoryName)}/subcategories`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ subCategoryName, image })
+        });
+
+        if (res.ok) {
+            alert("Sub-category added!");
+            e.target.reset();
+            loadData();
+        } else {
+            const err = await res.json();
+            alert(err.message || "Error adding sub-category");
         }
     });
 }

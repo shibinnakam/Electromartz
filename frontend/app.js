@@ -204,7 +204,10 @@ window.redirectToRazorpay = async () => {
             })
         });
 
-        if (!res.ok) throw new Error("Failed to create order on server");
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.message || "Failed to create order on server");
+        }
         const orderData = await res.json();
 
         // 2. Initialize Razorpay Checkout
