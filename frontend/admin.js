@@ -107,6 +107,18 @@ function renderDashboard() {
     catSelect.innerHTML = '<option value="">Select Category</option>' + 
         categories.map(cat => `<option value="${cat.name}">${cat.name}</option>`).join('');
 
+    const brandSelect = document.getElementById('p-brand');
+    catSelect.addEventListener('change', (e) => {
+        const selectedCatName = e.target.value;
+        const selectedCat = categories.find(c => c.name === selectedCatName);
+        if (selectedCat && selectedCat.subCategories && selectedCat.subCategories.length > 0) {
+            brandSelect.innerHTML = '<option value="">Select Brand</option>' + 
+                selectedCat.subCategories.map(sub => `<option value="${sub.name}">${sub.name}</option>`).join('');
+        } else {
+            brandSelect.innerHTML = '<option value="">No Brands Found</option>';
+        }
+    });
+
     const scCatSelect = document.getElementById('sc-category');
     if (scCatSelect) {
         scCatSelect.innerHTML = '<option value="">Select Category</option>' + 
