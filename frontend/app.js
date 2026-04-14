@@ -908,5 +908,5 @@ function setupIntersectionObserver() {
             }
         });
     }, options);
-    document.querySelectorAll('.hidden').forEach(el => observer.observe(el));
+    document.querySelectorAll('.hidden, .reveal-up').forEach(el => observer.observe(el));
 }

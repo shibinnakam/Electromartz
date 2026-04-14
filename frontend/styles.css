@@ -122,6 +122,23 @@ img {
     transition: var(--transition-slow);
 }
 
+.reveal-up {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-up.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Animation Delays for Staggering */
+.reveal-up:nth-child(1) { transition-delay: 0.1s; }
+.reveal-up:nth-child(2) { transition-delay: 0.2s; }
+.reveal-up:nth-child(3) { transition-delay: 0.3s; }
+.reveal-up:nth-child(4) { transition-delay: 0.4s; }
+
 .show {
     opacity: 1;
     transform: translateY(0);
@@ -400,6 +417,22 @@ nav.scrolled {
     border-radius: 50%;
 }
 
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+}
+
+.nav-actions .btn {
+    padding: 0.5rem 1.2rem;
+    font-size: 0.75rem;
+}
+
 /* Dark Hero Wrapper */
 .dark-hero-wrapper {
     background-color: var(--bg-primary);
@@ -575,7 +608,7 @@ nav.scrolled {
 
 .btn.secondary {
     border: 1px solid rgba(255, 255, 255, 0.3);
-    color: var(--text-light);
+    color: var(--text-primary);
     backdrop-filter: blur(5px);
 }
 
