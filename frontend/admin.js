@@ -137,13 +137,43 @@ function setupEventListeners() {
     // Add Product
     document.getElementById('add-product-form').addEventListener('submit', async (e) => {
         e.preventDefault();
+
+        // Collect images
+        const images = Array.from(document.querySelectorAll('.p-image-url')).map(input => input.value).filter(val => val.trim() !== '');
+        
+        // Collect highlights
+        const highlights = Array.from(document.querySelectorAll('.p-highlight')).map(input => input.value).filter(val => val.trim() !== '');
+        
+        // Collect specifications
+        const specifications = [];
+        document.querySelectorAll('.spec-section').forEach(section => {
+            const sectionName = section.querySelector('.p-spec-section-name').value;
+            const specs = [];
+            section.querySelectorAll('.spec-input-row').forEach(row => {
+                const key = row.querySelector('.p-spec-key').value;
+                const value = row.querySelector('.p-spec-value').value;
+                if(key && value) {
+                    specs.push({ key, value });
+                }
+            });
+            if(sectionName && specs.length > 0) {
+                specifications.push({ section: sectionName, specs });
+            }
+        });
+
         const data = {
             id: Date.now().toString(),
             name: document.getElementById('p-name').value,
-            price: parseFloat(document.getElementById('p-price').value),
+            brand: document.getElementById('p-brand').value,
             category: document.getElementById('p-category').value,
-            image: document.getElementById('p-image').value,
-            description: document.getElementById('p-desc').value
+            description: document.getElementById('p-desc').value,
+            price: parseFloat(document.getElementById('p-price').value),
+            originalPrice: document.getElementById('p-original-price').value ? parseFloat(document.getElementById('p-original-price').value) : null,
+            inStock: document.getElementById('p-stock').value === 'true',
+            images: images,
+            image: images[0] || '', // fallback for older UI
+            highlights: highlights,
+            specifications: specifications
         };
 
         const token = await getToken();
@@ -188,6 +218,12 @@ function setupEventListeners() {
         }
 
         const image = await getImageData('c-image-url', 'c-image-file');
+        
+        // DynamoDB item size limit is 400KB. 
+        if (image && image.length > 350000) {
+            alert("The uploaded image is too large! Please use an image smaller than 250KB, or provide an image URL instead.");
+            return;
+        }
 
         const token = await getToken();
         const res = await fetch(`${AWS_CONFIG.apiUrl}categories`, {
@@ -221,6 +257,11 @@ function setupEventListeners() {
         }
 
         const image = await getImageData('sc-image-url', 'sc-image-file');
+        
+        if (image && image.length > 350000) {
+            alert("The uploaded image is too large! Please use an image smaller than 250KB, or provide an image URL instead.");
+            return;
+        }
 
         const token = await getToken();
         const res = await fetch(`${AWS_CONFIG.apiUrl}categories/${encodeURIComponent(categoryName)}/subcategories`, {
@@ -261,4 +302,58 @@ window.handleLogout = () => {
         currentUser.signOut();
         window.location.href = 'index.html';
     }
+};
+
+window.addInputRow = (containerId, type, placeholder) => {
+    const container = document.getElementById(containerId);
+    const div = document.createElement('div');
+    div.className = `form-group ${type}-input-row`;
+    div.style.display = 'flex';
+    div.style.gap = '1rem';
+    div.style.marginTop = '0.5rem';
+    div.innerHTML = `
+        <input type="text" class="p-${type}${type === 'image' ? '-url' : ''}" placeholder="${placeholder}" required style="flex:1;">
+        <button type="button" class="btn secondary" style="background:#ff4757; color:white; border-color:transparent;" onclick="this.parentElement.remove()">-</button>
+    `;
+    container.appendChild(div);
+};
+
+window.addSpecRow = (btn) => {
+    const container = btn.parentElement.parentElement;
+    const div = document.createElement('div');
+    div.className = `form-group spec-input-row`;
+    div.style.display = 'flex';
+    div.style.gap = '1rem';
+    div.style.alignItems = 'center';
+    div.style.marginTop = '0.5rem';
+    div.innerHTML = `
+        <input type="text" class="p-spec-key" placeholder="Key (e.g. Model Name)" required style="flex:1;">
+        <input type="text" class="p-spec-value" placeholder="Value (e.g. Z9 5G)" required style="flex:1;">
+        <button type="button" class="btn secondary" style="background:#ff4757; color:white; border-color:transparent;" onclick="this.parentElement.remove()">-</button>
+    `;
+    container.appendChild(div);
+};
+
+window.addSpecSection = () => {
+    const container = document.getElementById('specs-container');
+    const div = document.createElement('div');
+    div.className = 'spec-section';
+    div.style.background = 'rgba(255,255,255,0.05)';
+    div.style.padding = '1.5rem';
+    div.style.borderRadius = '12px';
+    div.style.marginBottom = '1.5rem';
+    div.innerHTML = `
+        <div class="form-group" style="display:flex; justify-content: space-between; align-items: center;">
+            <input type="text" class="p-spec-section-name" placeholder="Section Name (e.g., General)" style="width: 50%;" required>
+            <button type="button" class="btn secondary" style="background: #ff4757; color: white; border-color:transparent;" onclick="this.parentElement.parentElement.remove()">Remove Section</button>
+        </div>
+        <div class="spec-rows-container">
+            <div class="form-group spec-input-row" style="display:flex; gap:1rem; align-items: center; margin-top:0.5rem">
+                <input type="text" class="p-spec-key" placeholder="Key (e.g. Model Name)" required style="flex:1;">
+                <input type="text" class="p-spec-value" placeholder="Value (e.g. Z9 5G)" required style="flex:1;">
+                <button type="button" class="btn secondary" onclick="addSpecRow(this)">+</button>
+            </div>
+        </div>
+    `;
+    container.appendChild(div);
 };

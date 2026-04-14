@@ -189,14 +189,15 @@
             </div>
             <div class="admin-form-card">
                 <form id="add-product-form">
+                    <h3 style="margin-bottom: 1rem; color: var(--primary);">1. Basic Information</h3>
                     <div class="form-group">
                         <label>Product Name</label>
                         <input type="text" id="p-name" required>
                     </div>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem">
                         <div class="form-group">
-                            <label>Price (₹)</label>
-                            <input type="number" id="p-price" required>
+                            <label>Brand</label>
+                            <input type="text" id="p-brand" placeholder="e.g. iQOO, Apple" required>
                         </div>
                         <div class="form-group">
                             <label>Category</label>
@@ -206,14 +207,65 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>Image URL</label>
-                        <input type="text" id="p-image" placeholder="https://..." required>
-                    </div>
-                    <div class="form-group">
                         <label>Description</label>
                         <textarea id="p-desc" rows="4" required></textarea>
                     </div>
-                    <button type="submit" class="btn primary" style="width:100%">Save Product to Cloud</button>
+                    
+                    <h3 style="margin: 2rem 0 1rem; color: var(--primary);">2. Pricing & Stock</h3>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:1.5rem">
+                        <div class="form-group">
+                            <label>Selling Price (₹)</label>
+                            <input type="number" id="p-price" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Original Price (₹) [Optional]</label>
+                            <input type="number" id="p-original-price">
+                        </div>
+                        <div class="form-group">
+                            <label>Stock Status</label>
+                            <select id="p-stock" required>
+                                <option value="true">In Stock</option>
+                                <option value="false">Out of Stock</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <h3 style="margin: 2rem 0 1rem; color: var(--primary);">3. Media (Images)</h3>
+                    <div id="image-inputs-container">
+                        <div class="form-group image-input-row" style="display:flex; gap:1rem;">
+                            <input type="text" class="p-image-url" placeholder="https://..." required style="flex:1;">
+                            <button type="button" class="btn secondary" onclick="addInputRow('image-inputs-container', 'image', 'https://...')">+</button>
+                        </div>
+                    </div>
+
+                    <h3 style="margin: 2rem 0 1rem; color: var(--primary);">4. Key Highlights</h3>
+                    <div id="highlight-inputs-container">
+                        <div class="form-group highlight-input-row" style="display:flex; gap:1rem;">
+                            <input type="text" class="p-highlight" placeholder="e.g. 5000 mAh Battery" required style="flex:1;">
+                            <button type="button" class="btn secondary" onclick="addInputRow('highlight-inputs-container', 'highlight', 'e.g. 5000 mAh Battery')">+</button>
+                        </div>
+                    </div>
+
+                    <h3 style="margin: 2rem 0 1rem; color: var(--primary);">5. Specifications</h3>
+                    <div id="specs-container">
+                        <p style="color: rgba(255,255,255,0.6); margin-bottom: 1rem;">Add grouped specifications like "General" or "Display Features".</p>
+                        <div class="spec-section" style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem;">
+                            <div class="form-group" style="display:flex; justify-content: space-between; align-items: center;">
+                                <input type="text" class="p-spec-section-name" placeholder="Section Name (e.g., General)" style="width: 50%;" required>
+                                <button type="button" class="btn secondary" style="background: #ff4757; color: white; border-color: transparent;" onclick="this.parentElement.parentElement.remove()">Remove Section</button>
+                            </div>
+                            <div class="spec-rows-container">
+                                <div class="form-group spec-input-row" style="display:flex; gap:1rem; align-items: center; margin-top:0.5rem">
+                                    <input type="text" class="p-spec-key" placeholder="Key (e.g. Model Name)" required style="flex:1;">
+                                    <input type="text" class="p-spec-value" placeholder="Value (e.g. Z9 5G)" required style="flex:1;">
+                                    <button type="button" class="btn secondary" onclick="addSpecRow(this)">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn secondary" style="margin-bottom: 2rem;" onclick="addSpecSection()">+ Add Another Specification Section</button>
+
+                    <button type="submit" class="btn primary" style="width:100%; font-size: 1.1rem; padding: 1rem;">Save Detailed Product to Cloud</button>
                 </form>
             </div>
         </div>
