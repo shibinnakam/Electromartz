@@ -14,12 +14,12 @@
         body {
             display: flex;
             min-height: 100vh;
-            background: #050505;
+            background: var(--bg-secondary);
         }
 
         .admin-sidebar {
             width: var(--admin-sidebar-width);
-            background: rgba(15, 15, 15, 0.8);
+            background: var(--bg-dark);
             backdrop-filter: blur(20px);
             border-right: 1px solid rgba(255, 255, 255, 0.1);
             padding: 2rem;
@@ -64,22 +64,23 @@
         }
 
         .sidebar-link:hover, .sidebar-link.active {
-            background: rgba(0, 180, 216, 0.1);
-            color: var(--primary);
+            background: rgba(255, 102, 0, 0.1);
+            color: var(--accent-primary);
         }
 
         .stat-card {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
+            background: var(--card-bg);
+            border: 1px solid rgba(0,0,0,0.05);
             padding: 1.5rem;
             border-radius: 16px;
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
+            box-shadow: var(--card-shadow);
         }
 
         .stat-card h4 {
-            color: rgba(255, 255, 255, 0.5);
+            color: var(--text-secondary);
             font-size: 0.9rem;
             text-transform: uppercase;
         }
@@ -87,32 +88,34 @@
         .stat-card .value {
             font-size: 1.8rem;
             font-weight: 700;
+            color: var(--text-primary);
         }
 
         .admin-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 2rem;
-            background: var(--glass-bg);
+            background: var(--card-bg);
             border-radius: 16px;
             overflow: hidden;
+            box-shadow: var(--card-shadow);
         }
 
         .admin-table th, .admin-table td {
             padding: 1.2rem;
             text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .admin-table th {
-            background: rgba(255, 255, 255, 0.02);
+            background: rgba(0, 0, 0, 0.02);
             font-weight: 600;
-            color: var(--primary);
+            color: var(--text-primary);
         }
 
         .admin-form-card {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
+            background: var(--card-bg);
+            border: 1px solid rgba(0,0,0,0.05);
             padding: 2.5rem;
             border-radius: 20px;
             max-width: 800px;
