@@ -574,6 +574,23 @@ function setupEventListeners() {
     document.getElementById('close-cart').addEventListener('click', closeSideCart);
     document.getElementById('cart-overlay').addEventListener('click', closeSideCart);
 
+    // Mobile Menu Toggle
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const navLinks = document.querySelector('.nav-links');
+
+    mobileMenuBtn?.addEventListener('click', () => {
+        mobileMenuBtn.classList.toggle('active');
+        navLinks.classList.toggle('active');
+    });
+
+    // Close menu when clicking a link
+    navLinks?.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            mobileMenuBtn?.classList.remove('active');
+            navLinks?.classList.remove('active');
+        });
+    });
+
     // Address Form Listener
     document.getElementById('add-address-form')?.addEventListener('submit', handleAddAddress);
 }
