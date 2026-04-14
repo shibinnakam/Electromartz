@@ -6,15 +6,21 @@ const ddbDocClient = DynamoDBDocumentClient.from(client);
 exports.handler = async (event) => {
     try {
         const body = JSON.parse(event.body);
-        const { name, price, category, image, description } = body;
+        const { name, brand, price, originalPrice, inStock, category, image, images, description, highlights, specifications } = body;
 
         const product = {
-            id: Date.now().toString(), // Simple ID for now
+            id: body.id || Date.now().toString(),
             name,
+            brand: brand || null,
             price: Number(price),
+            originalPrice: originalPrice ? Number(originalPrice) : null,
+            inStock: inStock !== undefined ? inStock : true,
             category,
-            image,
+            image: image || (images && images.length > 0 ? images[0] : null), // For backwards compatibility
+            images: images || [],
             description,
+            highlights: highlights || [],
+            specifications: specifications || [],
             createdAt: new Date().toISOString()
         };
 

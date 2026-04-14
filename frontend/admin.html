@@ -7,143 +7,468 @@
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.1/dist/amazon-cognito-identity.min.js"></script>
     <style>
+    <style>
         :root {
-            --admin-sidebar-width: 260px;
+            --admin-sidebar-width: 240px;
+            --admin-accent: #FDB813;
         }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             display: flex;
             min-height: 100vh;
-            background: var(--bg-secondary);
+            background: #F8F9FA;
+            font-family: 'Inter', sans-serif;
+            color: #333;
         }
 
         .admin-sidebar {
             width: var(--admin-sidebar-width);
-            background: var(--bg-dark);
-            backdrop-filter: blur(20px);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 2rem;
+            background: #1F1F1F;
+            padding: 2rem 1.5rem;
             position: fixed;
             height: 100vh;
             display: flex;
             flex-direction: column;
-            gap: 2rem;
+            gap: 0.5rem;
             z-index: 100;
+            overflow-y: auto;
         }
+
+        .admin-logo {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #FFF;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+            padding: 0 0.5rem 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            margin-bottom: 1rem;
+            display: block;
+        }
+        .admin-logo span { color: var(--admin-accent); }
+
+        .sidebar-label {
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.3);
+            padding: 0.5rem 0.5rem 0.25rem;
+            margin-top: 0.5rem;
+        }
+
+        .sidebar-link {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            color: rgba(255,255,255,0.55);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: 0.2s;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+
+        .sidebar-link:hover { color: #FFF; background: rgba(255,255,255,0.05); }
+        .sidebar-link.active { background: rgba(253,184,19,0.12); color: var(--admin-accent); font-weight: 600; }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.07);
+        }
+        .sidebar-footer p { font-size: 0.72rem; color: rgba(255,255,255,0.28); padding: 0 0.5rem; }
 
         .admin-main {
             margin-left: var(--admin-sidebar-width);
             flex: 1;
-            padding: 3rem;
+            padding: 2.5rem 3rem;
         }
 
         .dashboard-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 3rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #EEEEEE;
         }
 
-        .sidebar-links {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
+        .dashboard-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1F1F1F;
+            letter-spacing: -0.5px;
         }
+        .dashboard-header p { font-size: 0.85rem; color: #777; margin-top: 0.2rem; }
 
-        .sidebar-link {
-            padding: 1rem;
-            border-radius: 12px;
-            color: rgba(255, 255, 255, 0.6);
-            text-decoration: none;
-            transition: 0.3s;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .sidebar-link:hover, .sidebar-link.active {
-            background: rgba(255, 102, 0, 0.1);
-            color: var(--accent-primary);
-        }
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1.2rem; }
 
         .stat-card {
-            background: var(--card-bg);
-            border: 1px solid rgba(0,0,0,0.05);
+            background: #FFF;
+            border: 1px solid #EEEEEE;
             padding: 1.5rem;
-            border-radius: 16px;
+            border-radius: 12px;
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
-            box-shadow: var(--card-shadow);
+            gap: 0.4rem;
         }
 
         .stat-card h4 {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
+            color: #999;
+            font-size: 0.72rem;
+            font-weight: 600;
             text-transform: uppercase;
+            letter-spacing: 0.8px;
         }
 
         .stat-card .value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--text-primary);
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1F1F1F;
+            letter-spacing: -1px;
         }
+
+        .stat-card .value.online { color: #22C55E; font-size: 1rem; font-weight: 700; letter-spacing: 1px; }
 
         .admin-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 2rem;
-            background: var(--card-bg);
-            border-radius: 16px;
+            margin-top: 0;
+            background: #FFF;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: var(--card-shadow);
+            border: 1px solid #EEEEEE;
         }
 
         .admin-table th, .admin-table td {
-            padding: 1.2rem;
+            padding: 1rem 1.2rem;
             text-align: left;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            border-bottom: 1px solid #F3F3F3;
+            font-size: 0.85rem;
         }
 
         .admin-table th {
-            background: rgba(0, 0, 0, 0.02);
-            font-weight: 600;
-            color: var(--text-primary);
+            background: #FAFAFA;
+            font-weight: 700;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #999;
         }
+
+        .admin-table td { color: #333; }
 
         .admin-form-card {
-            background: var(--card-bg);
-            border: 1px solid rgba(0,0,0,0.05);
+            background: #FFF;
+            border: 1px solid #EEEEEE;
             padding: 2.5rem;
-            border-radius: 20px;
-            max-width: 800px;
+            border-radius: 12px;
+            max-width: 820px;
         }
 
-        .tab-content {
-            display: none;
+        .admin-form-card h3 {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #999;
+            margin: 2rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #EEEEEE;
+        }
+        .admin-form-card h3:first-child { margin-top: 0; }
+
+        .form-group label { font-size: 0.8rem; font-weight: 600; color: #555; }
+
+        .form-group input, .form-group select, .form-group textarea {
+            background: #F8F9FA;
+            border: 1px solid #E5E5E5;
+            color: #333;
+            border-radius: 8px;
+            padding: 0.7rem 1rem;
+            font-size: 0.9rem;
         }
 
-        .tab-content.active {
-            display: block;
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: var(--admin-accent);
+            outline: none;
+            background: #FFF;
+        }
+
+        .btn.primary {
+            background: var(--admin-accent);
+            color: #1F1F1F;
+            font-weight: 700;
+            border-radius: 8px;
+            padding: 0.7rem 1.5rem;
+        }
+        .btn.primary:hover { background: #E5A00D; }
+
+        .btn.secondary {
+            background: #F3F3F3;
+            color: #333;
+            border: 1px solid #E5E5E5;
+            border-radius: 8px;
+        }
+        .btn.secondary:hover { background: #E5E5E5; }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        hr { border: 0; border-top: 1px solid #EEEEEE; margin: 2rem 0; }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1F1F1F;
+            margin: 2rem 0 1rem;
+        }
+
+        .spec-section {
+            background: #F8F9FA;
+            border: 1px solid #E5E5E5;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.2rem;
         }
     </style>
+
 </head>
 <body>
     <aside class="admin-sidebar">
-        <a href="index.html" class="logo">ELECTRO<span>MARTZ</span></a>
-        <ul class="sidebar-links">
-            <li class="sidebar-link active" onclick="switchTab('overview')">Overview</li>
-            <li class="sidebar-link" onclick="switchTab('products-tab')">Manage Products</li>
-            <li class="sidebar-link" onclick="switchTab('categories-tab')">Manage Categories</li>
-            <li class="sidebar-link" onclick="switchTab('orders-tab')">Manage Orders</li>
-            <li class="sidebar-link" onclick="handleLogout()">Logout</li>
-        </ul>
-        <div style="margin-top: auto">
-            <p style="font-size: 0.8rem; color: rgba(255,255,255,0.4)">Logged in as Admin</p>
+        <a href="index.html" class="admin-logo">ELECTRO<span>MARTZ</span></a>
+        <span class="sidebar-label">Main Menu</span>
+        <button class="sidebar-link active" onclick="switchTab('overview')">📊 Overview</button>
+        <button class="sidebar-link" onclick="switchTab('products-tab')">📦 Products</button>
+        <button class="sidebar-link" onclick="switchTab('categories-tab')">🗂 Categories</button>
+        <button class="sidebar-link" onclick="switchTab('orders-tab')">🧾 Orders</button>
+        <span class="sidebar-label">Account</span>
+        <button class="sidebar-link" onclick="handleLogout()">🚪 Logout</button>
+        <div class="sidebar-footer">
+            <p>Logged in as Admin</p>
         </div>
     </aside>
+
+    <main class="admin-main">
+        <div id="overview" class="tab-content active">
+            <div class="dashboard-header">
+                <div>
+                    <h1>Store Overview</h1>
+                    <p>Welcome back, Administrator.</p>
+                </div>
+                <button class="btn primary" onclick="switchTab('products-tab')">+ Add Product</button>
+            </div>
+
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <h4>Total Products</h4>
+                    <span class="value" id="stat-products">0</span>
+                </div>
+                <div class="stat-card">
+                    <h4>Categories</h4>
+                    <span class="value" id="stat-categories">0</span>
+                </div>
+                <div class="stat-card">
+                    <h4>Active API</h4>
+                    <span class="value online">● ONLINE</span>
+                </div>
+            </div>
+
+            <h3 class="section-title" style="margin-top: 2.5rem;">Recently Added Products</h3>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="recent-products-table">
+                    <!-- Data injected by JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <div id="products-tab" class="tab-content">
+            <div class="dashboard-header">
+                <div>
+                    <h1>Manage Products</h1>
+                    <p>Add and manage your inventory.</p>
+                </div>
+            </div>
+            <div class="admin-form-card">
+                <form id="add-product-form">
+                    <h3>1. Basic Information</h3>
+                    <div class="form-group">
+                        <label>Product Name</label>
+                        <input type="text" id="p-name" required>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem">
+                        <div class="form-group">
+                            <label>Brand (Sub-category)</label>
+                            <select id="p-brand" required>
+                                <option value="">Select Category First</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select id="p-category" required>
+                                <option value="">Select Category</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="p-desc" rows="4" required></textarea>
+                    </div>
+                    
+                    <h3>2. Pricing & Stock</h3>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:1.5rem">
+                        <div class="form-group">
+                            <label>Selling Price (₹)</label>
+                            <input type="number" id="p-price" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Original Price (₹)</label>
+                            <input type="number" id="p-original-price">
+                        </div>
+                        <div class="form-group">
+                            <label>Stock Status</label>
+                            <select id="p-stock" required>
+                                <option value="true">In Stock</option>
+                                <option value="false">Out of Stock</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <h3>3. Media (Images)</h3>
+                    <div id="image-inputs-container">
+                        <div class="form-group image-input-row" style="display:flex; gap:1rem;">
+                            <input type="text" class="p-image-url" placeholder="https://..." required style="flex:1;">
+                            <button type="button" class="btn secondary" onclick="addInputRow('image-inputs-container', 'image', 'https://...')">+</button>
+                        </div>
+                    </div>
+
+                    <h3>4. Key Highlights</h3>
+                    <div id="highlight-inputs-container">
+                        <div class="form-group highlight-input-row" style="display:flex; gap:1rem;">
+                            <input type="text" class="p-highlight" placeholder="e.g. 5000 mAh Battery" required style="flex:1;">
+                            <button type="button" class="btn secondary" onclick="addInputRow('highlight-inputs-container', 'highlight', 'e.g. 5000 mAh Battery')">+</button>
+                        </div>
+                    </div>
+
+                    <h3>5. Specifications</h3>
+                    <div id="specs-container">
+                        <div class="spec-section">
+                            <div class="form-group" style="display:flex; justify-content: space-between; align-items: center;">
+                                <input type="text" class="p-spec-section-name" placeholder="Section Name (e.g., General)" style="width: 50%;" required>
+                                <button type="button" class="btn secondary" style="background: #fee2e2; color: #dc2626; border-color: #fca5a5;" onclick="this.parentElement.parentElement.remove()">Remove Section</button>
+                            </div>
+                            <div class="spec-rows-container">
+                                <div class="form-group spec-input-row" style="display:flex; gap:1rem; align-items: center; margin-top:0.5rem">
+                                    <input type="text" class="p-spec-key" placeholder="Key (e.g. Model Name)" required style="flex:1;">
+                                    <input type="text" class="p-spec-value" placeholder="Value (e.g. Z9 5G)" required style="flex:1;">
+                                    <button type="button" class="btn secondary" onclick="addSpecRow(this)">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn secondary" style="margin-bottom: 1.5rem;" onclick="addSpecSection()">+ Add Specification Section</button>
+
+                    <hr>
+                    <button type="submit" class="btn primary" style="width:100%; font-size: 1rem; padding: 0.9rem;">Save Product to Cloud</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="categories-tab" class="tab-content">
+            <div class="dashboard-header">
+                <div>
+                    <h1>Manage Categories</h1>
+                    <p>Organise your product taxonomy.</p>
+                </div>
+            </div>
+            <div class="admin-form-card">
+                <form id="add-category-form">
+                    <h3>1. Add New Category</h3>
+                    <div class="form-group">
+                        <label>Category Name (Letters Only)</label>
+                        <input type="text" id="c-name" placeholder="e.g. Laptops" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Category Image</label>
+                        <input type="url" id="c-image-url" placeholder="https://...">
+                        <input type="file" id="c-image-file" accept="image/*" style="margin-top:0.5rem;">
+                    </div>
+                    <button type="submit" class="btn primary" style="width:100%">Create Category</button>
+                </form>
+
+                <hr>
+                <h3>2. Add Sub-category / Brand</h3>
+                <form id="add-subcategory-form">
+                    <div class="form-group">
+                        <label>Parent Category</label>
+                        <select id="sc-category" required>
+                            <option value="">Select Category</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Sub-category Name (e.g., Brand)</label>
+                        <input type="text" id="sc-name" placeholder="e.g. Lenovo" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Sub-category Image</label>
+                        <input type="url" id="sc-image-url" placeholder="https://...">
+                        <input type="file" id="sc-image-file" accept="image/*" style="margin-top:0.5rem;">
+                    </div>
+                    <button type="submit" class="btn primary" style="width:100%">Add Sub-category</button>
+                </form>
+
+                <h3 class="section-title">Existing Categories</h3>
+                <div id="category-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+        </div>
+
+        <div id="orders-tab" class="tab-content">
+            <div class="dashboard-header">
+                <div>
+                    <h1>Customer Orders</h1>
+                    <p>Review and manage all customer orders.</p>
+                </div>
+            </div>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer ID</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="orders-list">
+                    <!-- Data injected by JS -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="admin.js"></script>
+</body>
+</html>
+
 
     <main class="admin-main">
         <div id="overview" class="tab-content active">

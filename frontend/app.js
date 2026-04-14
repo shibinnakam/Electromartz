@@ -15,6 +15,8 @@ let currentUser = null;
 let userProfile = {};
 let savedAddresses = []; // List of address objects
 let wishlist = []; // Store product IDs
+let currentHeroSlide = 0;
+let heroAutoplayInterval;
 
 // --- AWS Cognito Setup ---
 const poolData = {
@@ -33,6 +35,7 @@ async function initApp() {
     await checkUserSession();
     await loadInitialData();
     setupIntersectionObserver();
+    initHeroCarousel();
 }
 
 async function loadInitialData() {
@@ -86,11 +89,13 @@ function renderProducts(productsToRender) {
                     <button class="add-btn" onclick="addToCart(event, '${product.id}')">Add to Cart</button>
                 </div>
                 <div class="product-info">
-                    <div class="interactive-rating" data-id="${product.id}">
+                    <div class="interactive-rating emetix-stars" data-id="${product.id}">
                         ${[1,2,3,4,5].map(s => `<span class="star" onclick="submitRating(event, '${product.id}', ${s})">★</span>`).join('')}
                     </div>
                     <h3>${product.name}</h3>
-                    <span class="price" style="color: var(--accent-primary); font-size: 1.2rem;">₹${product.price}</span>
+                    <div class="emetix-price">
+                        £${product.price}.00 <del>£${Math.round(product.price * 1.2)}.00</del>
+                    </div>
                 </div>
             </div>
         `;
@@ -342,12 +347,12 @@ function updateAuthUI(isLoggedIn) {
     const userSection = document.getElementById('user-section');
     if (isLoggedIn && currentUser) {
         userSection.innerHTML = `
-            <div class="user-info-group" style="display:flex; align-items:center; gap:0.5rem">
-                <button onclick="openDashboard('profile')" class="user-pill" style="display:flex; align-items:center; gap:0.5rem; background:#f1f5f9; padding:0.5rem 1rem; border-radius:20px; font-weight:600; border:none; cursor:pointer;">
+            <div class="user-info-group">
+                <button onclick="openDashboard('profile')" class="user-pill">
                     <span>${userProfile.name ? userProfile.name.split(' ')[0] : 'Account'}</span>
                 </button>
-                <div id="admin-badge-container" style="display:inline-block"></div>
-                <button onclick="handleLogout()" style="color:var(--text-secondary); font-size:0.8rem; border:none; background:none; cursor:pointer; font-weight:500;">Logout</button>
+                <div id="admin-badge-container"></div>
+                <button onclick="handleLogout()" class="logout-link">Logout</button>
             </div>
         `;
         
@@ -355,22 +360,16 @@ function updateAuthUI(isLoggedIn) {
         const navLinks = document.querySelector('.nav-links');
         if (navLinks) {
             navLinks.innerHTML = `
-                <li><a href="#hero">Home</a></li>
+                <li><a href="#hero" class="active">Home</a></li>
                 <li><a href="#products">Store</a></li>
                 <li><a href="javascript:openDashboard('wishlist')">Wishlist</a></li>
                 <li><a href="javascript:openDashboard('orders')">Orders</a></li>
             `;
         }
-
-        // Personalize Hero
-        const heroTitle = document.querySelector('#hero h1');
-        if (heroTitle) {
-            heroTitle.innerHTML = `Welcome back, <br>${userProfile.name ? userProfile.name.split(' ')[0] : 'Technophile'}.`;
-        }
         
         fetchWishlist();
     } else {
-        userSection.innerHTML = `<button id="login-btn" onclick="openAuthModal()" class="btn secondary" style="padding: 0.5rem 1rem;">Login</button>`;
+        userSection.innerHTML = `<button id="login-btn" onclick="openAuthModal()" class="btn secondary">Login</button>`;
     }
 }
 
@@ -508,6 +507,10 @@ document.getElementById('login-form')?.addEventListener('submit', async (e) => {
 
     cognitoUser.authenticateUser(authDetails, {
         onSuccess: (result) => {
+            const accessToken = result.getAccessToken().getJwtToken();
+            const refreshToken = result.getRefreshToken().getToken();
+            localStorage.setItem('accessToken', accessToken);
+            localStorage.setItem('refreshToken', refreshToken);
             window.location.reload();
         },
         onFailure: (err) => {
@@ -561,11 +564,9 @@ function setupEventListeners() {
     const navbar = document.getElementById('navbar');
     window.addEventListener('scroll', () => {
         if (window.scrollY > 50) {
-            navbar.style.background = 'rgba(255, 255, 255, 0.95)';
-            navbar.style.borderBottom = '1px solid rgba(0, 0, 0, 0.05)';
+            navbar.classList.add('scrolled');
         } else {
-            navbar.style.background = 'var(--glass-bg)';
-            navbar.style.borderBottom = 'none';
+            navbar.classList.remove('scrolled');
         }
     });
 
@@ -605,6 +606,60 @@ function closeSideCart() {
     document.getElementById('cart-sidebar').classList.remove('active');
     document.getElementById('cart-overlay').classList.remove('active');
     document.body.style.overflow = 'auto';
+}
+
+// --- Hero Carousel ---
+function initHeroCarousel() {
+    const slides = document.querySelectorAll('.hero-slide');
+    if (slides.length === 0) return;
+    
+    startHeroAutoplay();
+    
+    // Add event listeners to hero nav if they exist
+    // They are currently using onclick in HTML for simplicity per project pattern
+}
+
+window.showSlide = (index) => {
+    const slides = document.querySelectorAll('.hero-slide');
+    const dots = document.querySelectorAll('.dot');
+    
+    if (index >= slides.length) currentHeroSlide = 0;
+    else if (index < 0) currentHeroSlide = slides.length - 1;
+    else currentHeroSlide = index;
+
+    slides.forEach((slide, i) => {
+        slide.classList.remove('active');
+        dots[i].classList.remove('active');
+        if (i === currentHeroSlide) {
+            slide.classList.add('active');
+            dots[i].classList.add('active');
+        }
+    });
+};
+
+window.nextSlide = () => {
+    stopHeroAutoplay();
+    showSlide(currentHeroSlide + 1);
+};
+
+window.prevSlide = () => {
+    stopHeroAutoplay();
+    showSlide(currentHeroSlide - 1);
+};
+
+window.goToSlide = (index) => {
+    stopHeroAutoplay();
+    showSlide(index);
+};
+
+function startHeroAutoplay() {
+    heroAutoplayInterval = setInterval(() => {
+        showSlide(currentHeroSlide + 1);
+    }, 3000);
+}
+
+function stopHeroAutoplay() {
+    clearInterval(heroAutoplayInterval);
 }
 
 // --- Dashboard logic ---
