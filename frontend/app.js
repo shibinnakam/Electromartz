@@ -18,6 +18,14 @@ let wishlist = []; // Store product IDs
 let currentHeroSlide = 0;
 let heroAutoplayInterval;
 
+// --- Filter State ---
+let activeFilters = {
+    categories: [],
+    brands: [],
+    maxPrice: 500000,
+    sortBy: 'default'
+};
+
 // --- AWS Cognito Setup ---
 const poolData = {
     UserPoolId: AWS_CONFIG.userPoolId,
@@ -36,6 +44,13 @@ async function initApp() {
     await loadInitialData();
     setupIntersectionObserver();
     initHeroCarousel();
+
+    // Handle redirection after login
+    const redirect = sessionStorage.getItem('loginRedirect');
+    if (redirect && currentUser) {
+        sessionStorage.removeItem('loginRedirect');
+        if (redirect === 'profile') openDashboard('profile');
+    }
 }
 
 async function loadInitialData() {
@@ -44,6 +59,7 @@ async function loadInitialData() {
             fetchProducts(),
             fetchCategories()
         ]);
+        renderStoreExplorer();
     } catch (err) {
         console.warn("Using fallback data. Please check your API configuration.");
         products = [
@@ -114,6 +130,7 @@ function updateCategoryUI() {
         });
         filterContainer.innerHTML = html;
         setupFilterListeners();
+        renderStoreExplorer(); // Re-render sidebar if categories change
     }
 
     // Update Admin dropdown
@@ -360,8 +377,8 @@ function updateAuthUI(isLoggedIn) {
         const navLinks = document.querySelector('.nav-links');
         if (navLinks) {
             navLinks.innerHTML = `
-                <li><a href="#hero" class="active">Home</a></li>
-                <li><a href="#products">Store</a></li>
+                <li><a href="javascript:switchView('home')" class="active">Home</a></li>
+                <li><a href="javascript:switchView('store')">Store</a></li>
                 <li><a href="javascript:openDashboard('wishlist')">Wishlist</a></li>
                 <li><a href="javascript:openDashboard('orders')">Orders</a></li>
             `;
@@ -511,6 +528,7 @@ document.getElementById('login-form')?.addEventListener('submit', async (e) => {
             const refreshToken = result.getRefreshToken().getToken();
             localStorage.setItem('accessToken', accessToken);
             localStorage.setItem('refreshToken', refreshToken);
+            sessionStorage.setItem('loginRedirect', 'profile'); // Flag to open profile after reload
             window.location.reload();
         },
         onFailure: (err) => {
@@ -612,6 +630,214 @@ function setupFilterListeners() {
         });
     });
 }
+
+// --- Store Explorer Logic ---
+
+window.renderStoreExplorer = () => {
+    const brandList = document.getElementById('brand-filter-list');
+    const catList = document.getElementById('category-filter-list');
+    
+    if (!brandList || !catList) return;
+
+    // 1. Render Categories
+    catList.innerHTML = categories.map(cat => `
+        <label class="filter-item">
+            <input type="checkbox" value="${cat.name}" onchange="toggleCategoryFilter('${cat.name}')" ${activeFilters.categories.includes(cat.name) ? 'checked' : ''}>
+            ${cat.name}
+        </label>
+    `).join('');
+
+    // 2. Render Brands (Extracted from products)
+    const brands = [...new Set(products.map(p => p.brand).filter(b => b))].sort();
+    brandList.innerHTML = brands.map(brand => `
+        <label class="filter-item">
+            <input type="checkbox" value="${brand}" onchange="toggleBrandFilter('${brand}')" ${activeFilters.brands.includes(brand) ? 'checked' : ''}>
+            ${brand}
+        </label>
+    `).join('');
+
+    applyFilters();
+};
+
+window.toggleCategoryFilter = (cat) => {
+    if (activeFilters.categories.includes(cat)) {
+        activeFilters.categories = activeFilters.categories.filter(c => c !== cat);
+    } else {
+        activeFilters.categories.push(cat);
+    }
+    applyFilters();
+};
+
+window.toggleBrandFilter = (brand) => {
+    if (activeFilters.brands.includes(brand)) {
+        activeFilters.brands = activeFilters.brands.filter(b => b !== brand);
+    } else {
+        activeFilters.brands.push(brand);
+    }
+    applyFilters();
+};
+
+window.updatePriceFilter = (val) => {
+    activeFilters.maxPrice = Number(val);
+    const label = document.getElementById('price-max-label');
+    if (label) label.innerText = val;
+    applyFilters();
+};
+
+window.handleSort = (val) => {
+    activeFilters.sortBy = val;
+    applyFilters();
+};
+
+window.clearAllFilters = () => {
+    activeFilters = {
+        categories: [],
+        brands: [],
+        maxPrice: 500000,
+        sortBy: 'default'
+    };
+    // Reset UI elements
+    const range = document.getElementById('price-range');
+    if (range) range.value = 500000;
+    const label = document.getElementById('price-max-label');
+    if (label) label.innerText = 500000;
+    document.querySelectorAll('.filter-item input').forEach(input => input.checked = false);
+    applyFilters();
+};
+
+window.applyFilters = () => {
+    let filtered = products.filter(p => {
+        const matchesCategory = activeFilters.categories.length === 0 || activeFilters.categories.includes(p.category);
+        const matchesBrand = activeFilters.brands.length === 0 || activeFilters.brands.includes(p.brand);
+        const matchesPrice = p.price <= activeFilters.maxPrice;
+        return matchesCategory && matchesBrand && matchesPrice;
+    });
+
+    // Handle Sorting
+    if (activeFilters.sortBy === 'price-low') {
+        filtered.sort((a, b) => a.price - b.price);
+    } else if (activeFilters.sortBy === 'price-high') {
+        filtered.sort((a, b) => b.price - a.price);
+    }
+
+    renderExplorerGrid(filtered);
+    updateActiveFilterTags();
+};
+
+function renderExplorerGrid(filteredProducts) {
+    const grid = document.getElementById('explorer-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    if (filteredProducts.length === 0) {
+        grid.innerHTML = '<div class="empty-msg" style="grid-column: 1/-1; padding: 4rem; text-align: center;"><h3>No products match your filters.</h3><p>Try adjusting your criteria.</p></div>';
+        return;
+    }
+
+    filteredProducts.forEach(product => {
+        const isInWishlist = wishlist.includes(product.id);
+        const productCard = `
+            <div class="product-card" data-id="${product.id}" onclick="addToRecentlyViewed('${product.id}')">
+                <div class="product-img">
+                    <img src="${product.image}" alt="${product.name}" onerror="this.src='https://placehold.co/400x400/fff/3B82F6?text=${product.name.replace(' ', '+')}'">
+                    <button class="wishlist-btn ${isInWishlist ? 'active' : ''}" onclick="toggleWishlist(event, '${product.id}')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="${isInWishlist ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.78-8.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                    </button>
+                    ${product.brand ? `<span class="category-pill" style="position:absolute; top:1rem; left:1rem; margin:0;">${product.brand}</span>` : ''}
+                    <button class="add-btn" onclick="addToCart(event, '${product.id}')">Add to Cart</button>
+                </div>
+                <div class="product-info">
+                    <div class="interactive-rating emetix-stars" data-id="${product.id}">
+                        ${[1,2,3,4,5].map(s => `<span class="star" onclick="submitRating(event, '${product.id}', ${s})">★</span>`).join('')}
+                    </div>
+                    <h3>${product.name}</h3>
+                    <div class="emetix-price">
+                        ₹${product.price}.00 <del>₹${Math.round(product.price * 1.2)}.00</del>
+                    </div>
+                </div>
+            </div>
+        `;
+        grid.innerHTML += productCard;
+    });
+}
+
+function updateActiveFilterTags() {
+    const container = document.getElementById('active-filters');
+    if (!container) return;
+    
+    let html = '';
+    activeFilters.categories.forEach(cat => {
+        html += `<span class="filter-tag">${cat} <button onclick="toggleCategoryFilter('${cat}')">&times;</button></span>`;
+    });
+    activeFilters.brands.forEach(brand => {
+        html += `<span class="filter-tag">${brand} <button onclick="toggleBrandFilter('${brand}')">&times;</button></span>`;
+    });
+    if (activeFilters.maxPrice < 500000) {
+        html += `<span class="filter-tag">Under ₹${activeFilters.maxPrice} <button onclick="updatePriceFilter(500000)">&times;</button></span>`;
+    }
+    container.innerHTML = html;
+}
+
+// --- View Switching ---
+
+window.switchView = (viewName, category = null) => {
+    const mainSectionsIds = ['hero', 'categories', 'products', 'new-arrivals'];
+    const explorerSection = document.getElementById('store-explorer-view');
+    const heroWrapper = document.querySelector('.dark-hero-wrapper');
+    const featuresWrapper = document.querySelector('.features-wrapper');
+
+    if (viewName === 'store') {
+        // Hide Landing Sections
+        mainSectionsIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('hidden');
+        });
+        if (heroWrapper) heroWrapper.classList.add('hidden');
+        if (featuresWrapper) featuresWrapper.classList.add('hidden');
+        
+        // Show Explorer
+        if (explorerSection) explorerSection.classList.remove('hidden');
+        
+        // Handle Pre-filtering
+        if (category) {
+            activeFilters.categories = [category];
+            renderStoreExplorer(); // This will also call applyFilters
+        } else {
+            applyFilters();
+        }
+
+        // Update Nav Active State
+        updateNavLinks('store');
+        window.scrollTo(0, 0);
+    } else {
+        // Show Landing Sections
+        mainSectionsIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('hidden');
+        });
+        if (heroWrapper) heroWrapper.classList.remove('hidden');
+        if (featuresWrapper) featuresWrapper.classList.remove('hidden');
+
+        // Hide Explorer
+        if (explorerSection) explorerSection.classList.add('hidden');
+        
+        updateNavLinks('home');
+    }
+};
+
+function updateNavLinks(activeView) {
+    document.querySelectorAll('.nav-links a').forEach(link => {
+        link.classList.remove('active');
+        const href = link.getAttribute('href');
+        if (activeView === 'store' && (href === '#products' || href === 'javascript:switchView(\'store\')')) {
+            link.classList.add('active');
+        }
+        if (activeView === 'home' && href === '#hero') {
+            link.classList.add('active');
+        }
+    });
+}
+
 
 function openCart() {
     document.getElementById('cart-sidebar').classList.add('active');

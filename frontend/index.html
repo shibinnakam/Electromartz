@@ -22,9 +22,9 @@
                 <span></span>
             </button>
             <ul class="nav-links">
-                <li><a href="#hero">Home</a></li>
+                <li><a href="javascript:switchView('home')">Home</a></li>
                 <li><a href="#categories">Categories</a></li>
-                <li><a href="#products">Store</a></li>
+                <li><a href="javascript:switchView('store')">Store</a></li>
                 <li><a href="#footer">Contact</a></li>
             </ul>
             <div class="nav-actions">
@@ -221,34 +221,34 @@
                         <div class="promo-text">
                             <p>Limited Edition</p>
                             <h3>Premium Studio Audio</h3>
-                            <a href="#products">Explore Now</a>
+                            <a href="javascript:switchView('store', 'Audio')">Explore Now</a>
                         </div>
                     </div>
                     <div class="horiz-banner">
                         <div class="promo-text">
                             <p>Next Gen</p>
                             <h3>Smart Wearables</h3>
-                            <a href="#products">Shop Now</a>
+                            <a href="javascript:switchView('store', 'Wearables')">Shop Now</a>
                         </div>
                         <img src="https://images.unsplash.com/photo-1579586337278-3befd40fd17a?auto=format&fit=crop&q=80&w=1000" alt="Smart Watch">
                     </div>
                     <div class="square-banner">
                         <img src="https://placehold.co/200x200/252525/FFFFFF?text=Lenses" alt="Visual Gear">
                         <div class="promo-text">
-                            <h3>Optical Precision</h3>
+                            <h3 onclick="switchView('store', 'Mobile')" style="cursor:pointer">Optical Precision</h3>
                         </div>
                     </div>
                     <div class="square-banner">
                         <img src="https://placehold.co/200x200/252525/FFFFFF?text=Tablets" alt="Pro Tablets">
                         <div class="promo-text">
-                            <h3>Productivity Tools</h3>
+                            <h3 onclick="switchView('store', 'Mobile')" style="cursor:pointer">Productivity Tools</h3>
                         </div>
                     </div>
                     <div class="horiz-banner">
                         <div class="promo-text">
                             <p>Ultra Response</p>
                             <h3>Gaming Peripherals</h3>
-                            <a href="#products">Play Better</a>
+                            <a href="javascript:switchView('store', 'Mobile')">Play Better</a>
                         </div>
                         <img src="https://images.unsplash.com/photo-1600080972464-8e5f35802d3e?auto=format&fit=crop&q=80&w=1000" alt="Gamepad">
                     </div>
@@ -264,15 +264,68 @@
                         <span class="hero-tag">Best Sellers</span>
                         <h2>High-Performance <span>Store</span></h2>
                     </div>
-                    <div class="filter-tabs">
-                        <button class="filter-tab active" data-filter="all">All</button>
-                        <button class="filter-tab" data-filter="audio">Audio</button>
-                        <button class="filter-tab" data-filter="mobile">Mobile</button>
-                        <button class="filter-tab" data-filter="wearables">Wearables</button>
-                    </div>
                 </div>
                 <div id="product-grid" class="product-grid">
                     <!-- Products injected by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Store Explorer (Advanced Filtering) -->
+        <section id="store-explorer-view" class="section-padding hidden">
+            <div class="container">
+                <div class="explorer-layout">
+                    <!-- Sidebar Filters -->
+                    <aside class="explorer-sidebar glass">
+                        <div class="sidebar-header">
+                            <h3>Filters</h3>
+                            <button class="clear-filters" onclick="clearAllFilters()">Clear All</button>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <h4>Category</h4>
+                            <div id="category-filter-list" class="filter-options">
+                                <!-- Categories injected here -->
+                            </div>
+                        </div>
+
+                        <div class="filter-group">
+                            <h4>Brand</h4>
+                            <div id="brand-filter-list" class="filter-options">
+                                <!-- Brands injected here -->
+                            </div>
+                        </div>
+
+                        <div class="filter-group">
+                            <h4>Price Range</h4>
+                            <div class="price-range-wrapper">
+                                <div class="price-inputs">
+                                    <span>₹<span id="price-min-label">0</span></span>
+                                    <span>₹<span id="price-max-label">500000</span></span>
+                                </div>
+                                <input type="range" id="price-range" min="0" max="500000" step="1000" value="500000" oninput="updatePriceFilter(this.value)">
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- Main Content -->
+                    <div class="explorer-main">
+                        <div class="explorer-toolbar">
+                            <div id="active-filters" class="active-filters">
+                                <!-- Active tags injected here -->
+                            </div>
+                            <div class="sort-options">
+                                <select id="sort-by" onchange="handleSort(this.value)">
+                                    <option value="default">Sort By: Featured</option>
+                                    <option value="price-low">Price: Low to High</option>
+                                    <option value="price-high">Price: High to Low</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="explorer-grid" class="product-grid">
+                            <!-- Filtered products injected here -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
