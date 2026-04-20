@@ -377,7 +377,7 @@ function updateAuthUI(isLoggedIn) {
         const navLinks = document.querySelector('.nav-links');
         if (navLinks) {
             navLinks.innerHTML = `
-                <li><a href="javascript:switchView('home')" class="active">Home</a></li>
+                <li><a href="javascript:switchView('user-page')" class="active">Dashboard</a></li>
                 <li><a href="javascript:switchView('store')">Store</a></li>
                 <li><a href="javascript:openDashboard('wishlist')">Wishlist</a></li>
                 <li><a href="javascript:openDashboard('orders')">Orders</a></li>
@@ -385,6 +385,7 @@ function updateAuthUI(isLoggedIn) {
         }
         
         fetchWishlist();
+        switchView('user-page');
     } else {
         userSection.innerHTML = `<button id="login-btn" onclick="openAuthModal()" class="btn secondary">Login</button>`;
     }
@@ -783,31 +784,33 @@ function updateActiveFilterTags() {
 window.switchView = (viewName, category = null) => {
     const mainSectionsIds = ['hero', 'categories', 'products', 'new-arrivals'];
     const explorerSection = document.getElementById('store-explorer-view');
+    const userPageSection = document.getElementById('user-page');
     const heroWrapper = document.querySelector('.dark-hero-wrapper');
     const featuresWrapper = document.querySelector('.features-wrapper');
 
+    // Hide EVERYTHING by default
+    mainSectionsIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+    });
+    if (heroWrapper) heroWrapper.classList.add('hidden');
+    if (featuresWrapper) featuresWrapper.classList.add('hidden');
+    if (explorerSection) explorerSection.classList.add('hidden');
+    if (userPageSection) userPageSection.classList.add('hidden');
+
     if (viewName === 'store') {
-        // Hide Landing Sections
-        mainSectionsIds.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.classList.add('hidden');
-        });
-        if (heroWrapper) heroWrapper.classList.add('hidden');
-        if (featuresWrapper) featuresWrapper.classList.add('hidden');
-        
-        // Show Explorer
         if (explorerSection) explorerSection.classList.remove('hidden');
-        
-        // Handle Pre-filtering
         if (category) {
             activeFilters.categories = [category];
-            renderStoreExplorer(); // This will also call applyFilters
+            renderStoreExplorer();
         } else {
             applyFilters();
         }
-
-        // Update Nav Active State
         updateNavLinks('store');
+        window.scrollTo(0, 0);
+    } else if (viewName === 'user-page') {
+        if (userPageSection) userPageSection.classList.remove('hidden');
+        updateNavLinks('user-page');
         window.scrollTo(0, 0);
     } else {
         // Show Landing Sections
@@ -817,10 +820,6 @@ window.switchView = (viewName, category = null) => {
         });
         if (heroWrapper) heroWrapper.classList.remove('hidden');
         if (featuresWrapper) featuresWrapper.classList.remove('hidden');
-
-        // Hide Explorer
-        if (explorerSection) explorerSection.classList.add('hidden');
-        
         updateNavLinks('home');
     }
 };
@@ -829,10 +828,13 @@ function updateNavLinks(activeView) {
     document.querySelectorAll('.nav-links a').forEach(link => {
         link.classList.remove('active');
         const href = link.getAttribute('href');
-        if (activeView === 'store' && (href === '#products' || href === 'javascript:switchView(\'store\')')) {
+        if (activeView === 'store' && (href === '#products' || href.includes('store'))) {
             link.classList.add('active');
         }
-        if (activeView === 'home' && href === '#hero') {
+        if (activeView === 'user-page' && (href.includes('wishlist') || href.includes('orders') || href.includes('profile'))) {
+            link.classList.add('active');
+        }
+        if (activeView === 'home' && href.includes('home')) {
             link.classList.add('active');
         }
     });
@@ -907,8 +909,7 @@ function stopHeroAutoplay() {
 
 // --- Dashboard logic ---
 window.openDashboard = async (tabId = 'profile') => {
-    document.getElementById('user-dashboard-modal').classList.add('active');
-    document.body.style.overflow = 'hidden';
+    switchView('user-page');
     switchDashTab(tabId);
     if (tabId === 'orders') await fetchUserOrders();
     if (tabId === 'wishlist') await fetchWishlist();
@@ -916,8 +917,7 @@ window.openDashboard = async (tabId = 'profile') => {
 };
 
 window.closeDashboard = () => {
-    document.getElementById('user-dashboard-modal').classList.remove('active');
-    document.body.style.overflow = 'auto';
+    switchView('home');
 };
 
 window.switchDashTab = (tabId) => {

@@ -483,83 +483,82 @@
         </div>
     </div>
 
-    <!-- User Dashboard Modal -->
-    <div id="user-dashboard-modal" class="modal-overlay">
-        <div class="modal-content dashboard-content" style="max-width: 900px; height: 85vh; display: flex; flex-direction: column;">
-            <button class="modal-close" onclick="closeDashboard()">&times;</button>
-            <div class="dashboard-wrapper" style="display: flex; flex: 1; overflow: hidden;">
-                <aside class="dashboard-sidebar" style="width: 200px; border-right: 1px solid #eee; padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
-                    <button class="dash-tab active" id="profile-tab-btn" onclick="switchDashTab('profile')">My Profile</button>
-                    <button class="dash-tab" id="addresses-tab-btn" onclick="switchDashTab('addresses')">Saved Addresses</button>
-                    <button class="dash-tab" id="orders-tab-btn" onclick="switchDashTab('orders')">Order History</button>
-                    <button class="dash-tab" id="wishlist-tab-btn" onclick="switchDashTab('wishlist')">Wishlist</button>
-                    <button class="dash-tab" id="recent-tab-btn" onclick="switchDashTab('recent')">Recently Viewed</button>
-                </aside>
-                <main class="dashboard-main" style="flex: 1; padding: 2rem; overflow-y: auto;">
-                    <div id="profile-tab" class="dash-section active">
-                        <div class="modal-header">
-                            <h2>Your Profile</h2>
-                            <p>Update your basic account information.</p>
+        <!-- User Page / Dashboard Section -->
+        <section id="user-page" class="section-padding hidden">
+            <div class="container">
+                <div class="dashboard-wrapper explorer-layout" style="min-height: 70vh;">
+                    <aside class="dashboard-sidebar explorer-sidebar glass">
+                        <div class="sidebar-header">
+                            <h3>Dashboard</h3>
                         </div>
-                        <form id="profile-form">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Full Name</label>
-                                    <input type="text" id="p-name-field" required>
-                                </div>
-                                <div class="form-group">
-                                    <label>Phone Number</label>
-                                    <input type="tel" id="p-phone-field" required>
-                                </div>
+                        <div class="dash-tabs-vertical" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <button class="dash-tab active" id="profile-tab-btn" onclick="switchDashTab('profile')">My Profile</button>
+                            <button class="dash-tab" id="addresses-tab-btn" onclick="switchDashTab('addresses')">Saved Addresses</button>
+                            <button class="dash-tab" id="orders-tab-btn" onclick="switchDashTab('orders')">Order History</button>
+                            <button class="dash-tab" id="wishlist-tab-btn" onclick="switchDashTab('wishlist')">Wishlist</button>
+                            <button class="dash-tab" id="recent-tab-btn" onclick="switchDashTab('recent')">Recently Viewed</button>
+                        </div>
+                    </aside>
+
+                    <div class="dashboard-main explorer-main glass" style="padding: 2.5rem; border-radius: 20px;">
+                        <div id="profile-tab" class="dash-section active">
+                            <div class="section-header">
+                                <h2>Your Profile</h2>
+                                <p>Update your account information.</p>
                             </div>
-                            <button type="submit" class="btn primary" style="width:100%">Update Basic Info</button>
-                        </form>
-                    </div>
+                            <form id="profile-form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Full Name</label>
+                                        <input type="text" id="p-name-field" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Phone Number</label>
+                                        <input type="tel" id="p-phone-field" required>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn primary" style="width:100%">Update Profile</button>
+                            </form>
+                        </div>
 
-                    <div id="addresses-tab" class="dash-section">
-                        <div class="modal-header">
-                            <h2>Saved Addresses</h2>
-                            <p>Manage your delivery locations for faster checkout.</p>
+                        <div id="addresses-tab" class="dash-section">
+                            <div class="section-header">
+                                <h2>Saved Addresses</h2>
+                                <p>Manage your delivery locations.</p>
+                            </div>
+                            <div id="address-list" style="display: grid; gap: 1rem; margin-bottom: 2rem;"></div>
+                            <button class="btn secondary" onclick="openAddAddressModal()" style="width: 100%; border-style: dashed;">+ Add New Address</button>
                         </div>
-                        <div id="address-list" style="display: grid; gap: 1rem; margin-bottom: 2rem;">
-                            <!-- Addresses injected here -->
-                        </div>
-                        <button class="btn secondary" onclick="openAddAddressModal()" style="width: 100%; border-style: dashed;">+ Add New Address</button>
-                    </div>
 
-                    <div id="orders-tab" class="dash-section">
-                        <div class="modal-header">
-                            <h2>Order History</h2>
-                            <p>Track your gadgets and invoices.</p>
+                        <div id="orders-tab" class="dash-section">
+                            <div class="section-header">
+                                <h2>Order History</h2>
+                                <p>Track your gadgets and invoices.</p>
+                            </div>
+                            <div id="user-orders-list" class="orders-grid">
+                                <p class="empty-msg">No orders found yet.</p>
+                            </div>
                         </div>
-                        <div id="user-orders-list" class="orders-grid">
-                            <p class="empty-msg">No orders found yet.</p>
-                        </div>
-                    </div>
 
-                    <div id="wishlist-tab" class="dash-section">
-                        <div class="modal-header">
-                            <h2>My Wishlist</h2>
-                            <p>Items you've saved for later.</p>
+                        <div id="wishlist-tab" class="dash-section">
+                            <div class="section-header">
+                                <h2>My Wishlist</h2>
+                                <p>Items you've saved for later.</p>
+                            </div>
+                            <div id="wishlist-items-list" class="wishlist-grid" style="display: grid; gap: 1rem;"></div>
                         </div>
-                        <div id="wishlist-items-list" class="wishlist-grid" style="display: grid; gap: 1rem;">
-                            <!-- Wishlist items injected here -->
-                        </div>
-                    </div>
 
-                    <div id="recent-tab" class="dash-section">
-                        <div class="modal-header">
-                            <h2>Recently Viewed</h2>
-                            <p>The tech you've been eye-ing.</p>
-                        </div>
-                        <div id="recent-items-list" class="recent-list" style="display: grid; gap: 1rem;">
-                            <!-- Recently viewed items injected here -->
+                        <div id="recent-tab" class="dash-section">
+                            <div class="section-header">
+                                <h2>Recently Viewed</h2>
+                                <p>The tech you've been eye-ing.</p>
+                            </div>
+                            <div id="recent-items-list" class="recent-list" style="display: grid; gap: 1rem;"></div>
                         </div>
                     </div>
-                </main>
+                </div>
             </div>
-        </div>
-    </div>
+        </section>
 
     <!-- Admin modal removed. Use admin.html for dashboard. -->
 
