@@ -1462,6 +1462,10 @@ footer {
     right: 1.5rem;
     font-size: 1.5rem;
     color: var(--text-secondary);
+    z-index: 100;
+    cursor: pointer;
+    background: none;
+    border: none;
 }
 
 .form-group {
@@ -1945,6 +1949,7 @@ input[type="range"] {
     font-size: 1.5rem;
     cursor: pointer;
     transition: 0.3s;
+    z-index: 100;
 }
 
 .explorer-close:hover {
