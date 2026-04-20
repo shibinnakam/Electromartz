@@ -2110,3 +2110,41 @@ input[type="range"] {
 .hidden {
     display: none !important;
 }
+
+/* User Section Styles */
+.user-info-group {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.user-pill {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--glass-border);
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: 0.3s;
+}
+
+.user-pill:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--accent-primary);
+}
+
+.logout-link {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.logout-link:hover {
+    color: var(--accent-primary);
+}
