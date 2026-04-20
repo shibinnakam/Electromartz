@@ -789,14 +789,11 @@ window.switchView = (viewName, category = null) => {
     const featuresWrapper = document.querySelector('.features-wrapper');
 
     // Hide EVERYTHING by default
-    mainSectionsIds.forEach(id => {
-        const el = document.getElementById(id);
+    const allSections = [...mainSectionsIds, 'store-explorer-view', 'user-page', 'features-wrapper', 'dark-hero-wrapper'];
+    allSections.forEach(id => {
+        const el = document.getElementById(id) || document.querySelector(`.${id}`);
         if (el) el.classList.add('hidden');
     });
-    if (heroWrapper) heroWrapper.classList.add('hidden');
-    if (featuresWrapper) featuresWrapper.classList.add('hidden');
-    if (explorerSection) explorerSection.classList.add('hidden');
-    if (userPageSection) userPageSection.classList.add('hidden');
 
     if (viewName === 'store') {
         if (explorerSection) explorerSection.classList.remove('hidden');
