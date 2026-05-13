@@ -109,6 +109,18 @@ function renderDashboard() {
     catSelect.innerHTML = '<option value="">Select Category</option>' + 
         categories.map(cat => `<option value="${cat.name}">${cat.name}</option>`).join('');
 
+    // --- NEW: Products Tab Logic ---
+    // 1. Populate Filter Bar
+    const filterBar = document.getElementById('product-filter-bar');
+    if (filterBar) {
+        filterBar.innerHTML = '<button class="filter-btn active" onclick="filterProducts(\'All\')">All Items</button>' + 
+            categories.map(cat => `<button class="filter-btn" onclick="filterProducts('${cat.name}')">${cat.name}</button>`).join('');
+    }
+
+    // 2. Render Initial Grid
+    renderProductGrid('All');
+    // --- END NEW ---
+
 
 
     // Category List Tags
@@ -250,5 +262,37 @@ window.handleLogout = () => {
     }
     window.location.href = 'index.html';
 };
+
+// --- Products Tab Actions ---
+window.toggleAddProductForm = () => {
+    const container = document.getElementById('add-product-container');
+    container.style.display = container.style.display === 'none' ? 'block' : 'none';
+};
+
+window.filterProducts = (category) => {
+    // Update active button
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        const isMatch = btn.innerText === category || (category === 'All' && btn.innerText === 'All Items');
+        btn.classList.toggle('active', isMatch);
+    });
+    renderProductGrid(category);
+};
+
+function renderProductGrid(category) {
+    const grid = document.getElementById('admin-product-grid');
+    if (!grid) return;
+
+    const filtered = category === 'All' ? products : products.filter(p => p.category === category);
+    
+    grid.innerHTML = filtered.slice().reverse().map(p => `
+        <div class="product-card-premium">
+            <img src="${p.image}" onerror="this.src='https://placehold.co/400x400?text=${p.name}'">
+            <div class="product-card-overlay">
+                <h4>${p.name}</h4>
+                <div class="price">₹${p.price}</div>
+            </div>
+        </div>
+    `).join('') || '<p style="grid-column: 1/-1; text-align: center; padding: 4rem; color: #999; font-weight: 500;">No products found in this category.</p>';
+}
 
 
