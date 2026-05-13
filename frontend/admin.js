@@ -120,6 +120,9 @@ function renderDashboard() {
 
     // 2. Render Initial Grid
     renderProductGrid('All');
+
+    // 3. Render All Products Management List
+    renderAllProducts();
     // --- END NEW ---
 
 
@@ -252,8 +255,12 @@ window.switchTab = (tabId) => {
     const links = document.querySelectorAll('.sidebar-link');
     if (tabId === 'overview') links[0].classList.add('active');
     if (tabId === 'products-tab') links[1].classList.add('active');
-    if (tabId === 'categories-tab') links[2].classList.add('active');
-    if (tabId === 'orders-tab') links[3].classList.add('active');
+    if (tabId === 'all-products-tab') {
+        links[2].classList.add('active');
+        renderAllProducts(); // Refresh on switch
+    }
+    if (tabId === 'categories-tab') links[3].classList.add('active');
+    if (tabId === 'orders-tab') links[4].classList.add('active');
 };
 
 window.handleLogout = () => {

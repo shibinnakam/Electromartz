@@ -15,25 +15,21 @@
     <!-- Navbar -->
     <nav id="navbar">
         <div class="container nav-container">
-            <a href="#" class="logo">ELECTRO<span>MARTZ</span></a>
+            <a href="#" class="logo">COCHIN<span>BAKERS</span></a>
             <button id="mobile-menu-btn" class="mobile-toggle">
                 <span></span>
                 <span></span>
                 <span></span>
             </button>
             <ul class="nav-links">
-                <li><a href="javascript:switchView('home')">Home</a></li>
-                <li><a href="#categories">Categories</a></li>
-                <li><a href="javascript:switchView('store')">Store</a></li>
-                <li><a href="#footer">Contact</a></li>
+                <li><a href="javascript:switchView('home')">HOME</a></li>
+                <li><a href="#about">ABOUT</a></li>
+                <li><a href="javascript:switchView('store')">PRODUCTS</a></li>
+                <li><a href="#footer">CONTACT</a></li>
             </ul>
             <div class="nav-actions">
-                <button id="cart-btn" class="cart-trigger">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-                    <span id="cart-count">0</span>
-                </button>
-                <div id="user-section" class="user-profile">
-                    <button id="login-btn" onclick="openAuthModal()" class="btn secondary">Login</button>
+                <div id="user-section">
+                    <button id="login-btn" onclick="openAuthModal()" class="btn login-pill">LOGIN</button>
                 </div>
             </div>
         </div>
@@ -64,24 +60,25 @@
             <div class="hero-overlay"></div>
             <section id="hero">
                 <div class="hero-slides">
-                    <!-- Slide 1: Headphones -->
-                    <div class="hero-slide active" data-index="0">
+                    <div class="hero-slide active">
                         <div class="container hero-container">
                             <div class="hero-content">
-                                <span class="hero-tag">New Season Arrival</span>
-                                <h1>Uncompromising <span>Sound</span> Quality.</h1>
-                                <p>Experience the nexus of audio engineering and aesthetic perfection with the all-new ELECTROMARTZ audiophile series.</p>
+                                <span class="hero-tag">AUTHENTIC & FRESH</span>
+                                <h1>Premium <span>Bakery</span> Delights.</h1>
+                                <p>Experience the nexus of traditional baking and premium quality with the all-new Cochin Bakers signature collection.</p>
                                 <div class="cta-group">
-                                    <a href="#products" class="btn primary">Shop Collection</a>
-                                    <a href="#categories" class="btn secondary">View All Gears</a>
+                                    <a href="javascript:switchView('store')" class="btn primary">View Products</a>
+                                    <a href="#about" class="btn secondary">Our Story</a>
                                 </div>
                             </div>
                             <div class="hero-image">
                                 <div class="glow-sphere"></div>
-                                <img src="assets/hero-headphones.png" alt="High-End Headphones">
+                                <img src="https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=1926&auto=format&fit=crop" alt="Premium Bread">
                             </div>
                         </div>
                     </div>
+                </div>
+            </section>
                     
                     <!-- Slide 2: Mobile -->
                     <div class="hero-slide" data-index="1">
@@ -373,59 +370,65 @@
     </main>
 
 
-    <!-- Auth Modals -->
-    <div id="auth-modal" class="modal-overlay">
+    <!-- Redesigned Auth Modal (Bakery Style) -->
+    <div id="auth-modal">
         <div class="modal-content">
-            <button class="modal-close" onclick="closeAuthModal()">&times;</button>
+            <button class="modal-close-new" onclick="closeAuthModal()">&times;</button>
+            
             <div id="login-form-container">
-                <div class="modal-header">
-                    <h2>Login</h2>
-                    <p>Welcome back to ELECTROMARTZ</p>
-                </div>
+                <img src="https://placehold.co/200x80/white/E31837?text=COCHIN+BAKERS" alt="Cochin Bakers Logo" class="auth-logo">
+                <h2>Login</h2>
+                <p class="auth-subtitle">Don't have an account? <span onclick="toggleAuthMode('signup')">Create an account</span></p>
+                
                 <form id="login-form">
                     <div class="form-group">
-                        <label>Email or Username</label>
-                        <input type="text" id="login-email" required>
+                        <input type="text" id="login-email" placeholder="Enter email" required>
                     </div>
                     <div class="form-group">
-                        <label>Password</label>
-                        <input type="password" id="login-password" required>
+                        <input type="password" id="login-password" placeholder="Enter password" required>
                     </div>
-                    <button type="submit" class="btn primary" style="width:100%">Sign In</button>
+                    <span class="forgot-link">Forgot your password?</span>
+                    <button type="submit" class="auth-btn-primary">Login</button>
                 </form>
-                <p class="auth-switch">Don't have an account? <span onclick="toggleAuthMode('signup')">Sign Up</span></p>
-            </div>
-            <div id="signup-form-container" style="display:none">
-                <div class="modal-header">
-                    <h2>Sign Up</h2>
-                    <p>Join the elite electronics circle</p>
+
+                <div class="auth-divider">OR</div>
+
+                <button class="auth-btn-google">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_Logo.svg" alt="Google">
+                    Continue with Google
+                </button>
+
+                <div class="auth-footer">
+                    &copy; 2026 CochinBakers. All rights reserved.
                 </div>
+            </div>
+
+            <div id="signup-form-container" style="display:none">
+                <img src="https://placehold.co/200x80/white/E31837?text=COCHIN+BAKERS" alt="Cochin Bakers Logo" class="auth-logo">
+                <h2>Create Account</h2>
+                <p class="auth-subtitle">Already have an account? <span onclick="toggleAuthMode('login')">Login</span></p>
+                
                 <form id="signup-form">
                     <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" id="signup-email" required>
+                        <input type="email" id="signup-email" placeholder="Enter email" required>
                     </div>
                     <div class="form-group">
-                        <label>Password</label>
-                        <input type="password" id="signup-password" required minlength="8">
+                        <input type="password" id="signup-password" placeholder="Enter password" required minlength="8">
                     </div>
-                    <button type="submit" class="btn primary" style="width:100%">Create Account</button>
+                    <button type="submit" class="auth-btn-primary">Create Account</button>
                 </form>
-                <p class="auth-switch">Already have an account? <span onclick="toggleAuthMode('login')">Login</span></p>
             </div>
+
             <div id="verify-form-container" style="display:none">
-                <div class="modal-header">
-                    <h2>Verify Account</h2>
-                    <p>Enter the 6-digit code sent to your email</p>
-                </div>
+                <h2>Verify Account</h2>
+                <p class="auth-subtitle">Enter the code sent to your email</p>
                 <form id="verify-form">
                     <div class="form-group">
-                        <label>Verification Code</label>
                         <input type="text" id="verify-code" placeholder="123456" required>
                     </div>
-                    <button type="submit" class="btn primary" style="width:100%">Confirm Code</button>
+                    <button type="submit" class="auth-btn-primary">Confirm Code</button>
                 </form>
-                <p class="auth-switch">Back to <span onclick="toggleAuthMode('login')">Login</span></p>
+                <p class="auth-subtitle">Back to <span onclick="toggleAuthMode('login')">Login</span></p>
             </div>
         </div>
     </div>

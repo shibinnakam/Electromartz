@@ -211,11 +211,41 @@
             font-weight: 700;
             opacity: 0.95;
         }
-        .product-card-overlay .price {
-            font-size: 1.1rem;
-            font-weight: 700;
-            opacity: 0.95;
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
         }
+        .modal-content {
+            background: #FFF;
+            padding: 2rem;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+        }
+
+        .action-btn {
+            padding: 0.5rem 0.8rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: 0.2s;
+            margin-right: 0.5rem;
+        }
+        .btn-edit { background: #EBF5FF; color: #3B82F6; }
+        .btn-edit:hover { background: #DBEAFE; }
+        .btn-delete { background: #FEF2F2; color: #EF4444; }
+        .btn-delete:hover { background: #FEE2E2; }
 
         /* POS / Quick Bill Sidebar */
         .pos-container {
@@ -294,8 +324,9 @@
         <a href="index.html" class="admin-logo">ELECTRO<span>MARTZ</span></a>
         <span class="sidebar-label">Main Menu</span>
         <button class="sidebar-link active" onclick="switchTab('overview')">📊 Overview</button>
-        <button class="sidebar-link" onclick="switchTab('products-tab')">📦 Products</button>
-        <button class="sidebar-link" onclick="switchTab('categories-tab')">🗂 Categories</button>
+        <button class="sidebar-link" onclick="switchTab('products-tab')">🍰 Quick POS</button>
+        <button class="sidebar-link" onclick="switchTab('all-products-tab')">📦 All Products</button>
+        <button class="sidebar-link" onclick="switchTab('categories-tab')">📁 Categories</button>
         <button class="sidebar-link" onclick="switchTab('orders-tab')">🧾 Orders</button>
         <span class="sidebar-label">Account</span>
         <button class="sidebar-link" onclick="handleLogout()">🚪 Logout</button>
@@ -492,7 +523,55 @@
                 </tbody>
             </table>
         </div>
+        <div id="all-products-tab" class="tab-content">
+            <div class="dashboard-header">
+                <div>
+                    <h1>Product Inventory</h1>
+                    <p>Edit or remove products from your store.</p>
+                </div>
+            </div>
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="all-products-list">
+                        <!-- Data injected by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </main>
+
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem">
+                <h2 style="font-family:'Outfit'; font-size:1.5rem">Edit Product</h2>
+                <button class="btn secondary" onclick="closeEditModal()" style="padding:0.4rem 0.8rem">×</button>
+            </div>
+            <form id="edit-product-form">
+                <input type="hidden" id="edit-p-id">
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" id="edit-p-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="edit-p-category" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Price (₹)</label>
+                    <input type="number" id="edit-p-price" required>
+                </div>
+                <button type="submit" class="btn primary" style="width:100%; margin-top:1rem">Save Changes</button>
+            </form>
+        </div>
+    </div>
 
     <script src="admin.js"></script>
 </body>
