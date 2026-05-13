@@ -6,12 +6,11 @@ const ddbDocClient = DynamoDBDocumentClient.from(client);
 exports.handler = async (event) => {
     try {
         const body = JSON.parse(event.body);
-        const { name, brand, price, originalPrice, inStock, category, image, images, description, highlights, specifications } = body;
+        const { name, price, originalPrice, inStock, category, image, images, description, highlights, specifications } = body;
 
         const product = {
             id: body.id || Date.now().toString(),
             name,
-            brand: brand || null,
             price: Number(price),
             originalPrice: originalPrice ? Number(originalPrice) : null,
             inStock: inStock !== undefined ? inStock : true,

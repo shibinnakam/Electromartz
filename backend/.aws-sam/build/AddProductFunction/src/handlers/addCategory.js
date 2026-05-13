@@ -7,7 +7,7 @@ const ddbDocClient = DynamoDBDocumentClient.from(client);
 exports.handler = async (event) => {
     try {
         const body = JSON.parse(event.body);
-        const { name, image } = body;
+        const { name } = body;
 
         if (!name || !/^[A-Za-z\s]+$/.test(name)) {
             return {
@@ -23,8 +23,6 @@ exports.handler = async (event) => {
 
         const category = {
             name: name.trim(),
-            image: image || "",
-            subCategories: [],
             createdAt: new Date().toISOString()
         };
 

@@ -14,23 +14,8 @@ Globals:
         ORDERS_TABLE: !Ref OrdersTable
         WISHLIST_TABLE: !Ref WishlistTable
         RATINGS_TABLE: !Ref RatingsTable
-        RAZORPAY_KEY_ID: !Ref RazorpayKeyId
-        RAZORPAY_KEY_SECRET: !Ref RazorpayKeySecret
-        RAZORPAY_WEBHOOK_SECRET: !Ref RazorpayWebhookSecret
 
-Parameters:
-  RazorpayKeyId:
-    Type: String
-    Description: Razorpay Live Key ID
-    NoEcho: true
-  RazorpayKeySecret:
-    Type: String
-    Description: Razorpay Live Key Secret
-    NoEcho: true
-  RazorpayWebhookSecret:
-    Type: String
-    Description: Razorpay Webhook Secret (Set this in Dashboard)
-    NoEcho: true
+
 
 Resources:
   # --- Databases ---
@@ -86,8 +71,6 @@ Resources:
           AttributeType: S
         - AttributeName: userId
           AttributeType: S
-        - AttributeName: razorpayOrderId
-          AttributeType: S
       KeySchema:
         - AttributeName: orderId
           KeyType: HASH
@@ -99,12 +82,7 @@ Resources:
               KeyType: HASH
           Projection:
             ProjectionType: ALL
-        - IndexName: RazorpayOrderIdIndex
-          KeySchema:
-            - AttributeName: razorpayOrderId
-              KeyType: HASH
-          Projection:
-            ProjectionType: ALL
+
 
   # --- Authentication ---
   UserPool:
@@ -237,20 +215,6 @@ Resources:
         - DynamoDBCrudPolicy:
             TableName: !Ref CategoriesTable
 
-  AddSubCategoryFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: src/handlers/addSubCategory.handler
-      Events:
-        ApiEvent:
-          Type: Api
-          Properties:
-            Path: /categories/{name}/subcategories
-            Method: post
-            RestApiId: !Ref EcomApi
-      Policies:
-        - DynamoDBCrudPolicy:
-            TableName: !Ref CategoriesTable
 
   CreateOrderFunction:
     Type: AWS::Serverless::Function
@@ -312,37 +276,7 @@ Resources:
         - DynamoDBCrudPolicy:
             TableName: !Ref RatingsTable
 
-  VerifyPaymentFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: src/handlers/verifyPayment.handler
-      Events:
-        ApiEvent:
-          Type: Api
-          Properties:
-            Path: /verify-payment
-            Method: post
-            RestApiId: !Ref EcomApi
-      Policies:
-        - DynamoDBCrudPolicy:
-            TableName: !Ref OrdersTable
 
-  RazorpayWebhookFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: src/handlers/razorpayWebhook.handler
-      Events:
-        ApiEvent:
-          Type: Api
-          Properties:
-            Path: /webhook/razorpay
-            Method: post
-            RestApiId: !Ref EcomApi
-            Auth:
-              Authorizer: NONE # Webhooks must be public
-      Policies:
-        - DynamoDBCrudPolicy:
-            TableName: !Ref OrdersTable
 
 Outputs:
   ApiUrl:
