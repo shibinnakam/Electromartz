@@ -9,6 +9,7 @@ const AWS_CONFIG = {
 let products = [];
 let categories = [];
 let orders = [];
+let currentBill = [];
 let currentUser = null;
 
 const poolData = {
@@ -285,7 +286,7 @@ function renderProductGrid(category) {
     const filtered = category === 'All' ? products : products.filter(p => p.category === category);
     
     grid.innerHTML = filtered.slice().reverse().map(p => `
-        <div class="product-card-premium">
+        <div class="product-card-premium" onclick="addToBill('${p.id}')">
             <img src="${p.image}" onerror="this.src='https://placehold.co/400x400?text=${p.name}'">
             <div class="product-card-overlay">
                 <h4>${p.name}</h4>
@@ -294,5 +295,95 @@ function renderProductGrid(category) {
         </div>
     `).join('') || '<p style="grid-column: 1/-1; text-align: center; padding: 4rem; color: #999; font-weight: 500;">No products found in this category.</p>';
 }
+
+// --- Quick Bill Logic ---
+window.addToBill = (productId) => {
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+
+    const existing = currentBill.find(item => item.id === productId);
+    if (existing) {
+        existing.qty += 1;
+    } else {
+        currentBill.push({ ...product, qty: 1 });
+    }
+    updateBillUI();
+};
+
+function updateBillUI() {
+    const container = document.getElementById('bill-items-container');
+    const totalEl = document.getElementById('bill-total-amount');
+
+    if (currentBill.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #999; padding-top: 2rem;">Click products to add</p>';
+        totalEl.innerText = '₹0';
+        return;
+    }
+
+    let total = 0;
+    container.innerHTML = currentBill.map((item, index) => {
+        const itemTotal = item.price * item.qty;
+        total += itemTotal;
+        return `
+            <div class="bill-item">
+                <div class="info">
+                    <h5>${item.name}</h5>
+                    <p>₹${item.price} x ${item.qty}</p>
+                </div>
+                <div style="display:flex; align-items:center; gap:0.5rem">
+                    <strong>₹${itemTotal}</strong>
+                    <button class="btn secondary" style="padding: 0.2rem 0.5rem; background: #FEF2F2; color: #E31837;" onclick="removeFromBill(${index})">×</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    totalEl.innerText = `₹${total}`;
+}
+
+window.removeFromBill = (index) => {
+    currentBill.splice(index, 1);
+    updateBillUI();
+};
+
+window.printReceipt = () => {
+    if (currentBill.length === 0) {
+        alert("Please add items to the bill first!");
+        return;
+    }
+
+    const receiptItems = document.getElementById('receipt-items');
+    const receiptTotal = document.getElementById('receipt-total-val');
+    const receiptDate = document.getElementById('receipt-date');
+
+    let total = 0;
+    receiptItems.innerHTML = currentBill.map((item, i) => {
+        const itemTotal = item.price * item.qty;
+        total += itemTotal;
+        return `
+            <tr>
+                <td>${i + 1}</td>
+                <td>${item.name}</td>
+                <td>${item.qty}</td>
+                <td style="text-align: right;">${itemTotal}</td>
+            </tr>
+        `;
+    }).join('');
+
+    receiptTotal.innerText = total;
+    const now = new Date();
+    receiptDate.innerText = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    // Show the hidden receipt area just for printing
+    const printArea = document.getElementById('receipt-print');
+    printArea.style.display = 'block';
+    
+    window.print();
+    
+    // Hide it back and clear the bill
+    printArea.style.display = 'none';
+    currentBill = [];
+    updateBillUI();
+};
 
 

@@ -211,6 +211,81 @@
             font-weight: 700;
             opacity: 0.95;
         }
+        .product-card-overlay .price {
+            font-size: 1.1rem;
+            font-weight: 700;
+            opacity: 0.95;
+        }
+
+        /* POS / Quick Bill Sidebar */
+        .pos-container {
+            display: flex;
+            gap: 2rem;
+            align-items: flex-start;
+        }
+
+        .products-section { flex: 1; }
+
+        .bill-sidebar {
+            width: 320px;
+            background: #FFFFFF;
+            border: 1px solid var(--admin-border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            position: sticky;
+            top: 3rem;
+            height: calc(100vh - 150px);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+
+        .bill-sidebar h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--admin-accent); }
+
+        .bill-items { flex: 1; overflow-y: auto; margin-bottom: 1.5rem; }
+
+        .bill-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #F3F4F6;
+        }
+        .bill-item:last-child { border-bottom: none; }
+        .bill-item .info h5 { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.2rem; }
+        .bill-item .info p { font-size: 0.8rem; color: var(--admin-text-muted); }
+
+        .bill-total {
+            border-top: 2px dashed var(--admin-border);
+            padding-top: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .bill-total div { display: flex; justify-content: space-between; font-weight: 800; font-size: 1.2rem; }
+
+        /* Thermal Printer Styles (58mm) */
+        @media print {
+            body * { visibility: hidden; }
+            #receipt-print, #receipt-print * { visibility: visible; }
+            #receipt-print {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 58mm;
+                padding: 2mm;
+                font-family: 'Courier New', Courier, monospace;
+                font-size: 10pt;
+                color: #000;
+                background: #FFF;
+            }
+            .receipt-header { text-align: center; margin-bottom: 4mm; border-bottom: 1px dashed #000; padding-bottom: 2mm; }
+            .receipt-header h2 { font-size: 14pt; margin-bottom: 1mm; text-transform: uppercase; }
+            .receipt-header p { font-size: 8pt; margin: 0; }
+            .receipt-table { width: 100%; border-collapse: collapse; margin-bottom: 4mm; }
+            .receipt-table th { text-align: left; border-bottom: 1px solid #000; font-size: 8pt; padding: 1mm 0; }
+            .receipt-table td { padding: 1mm 0; font-size: 9pt; vertical-align: top; }
+            .receipt-total { border-top: 1px dashed #000; padding-top: 2mm; text-align: right; }
+            .receipt-footer { text-align: center; margin-top: 6mm; font-size: 8pt; border-top: 1px dashed #000; padding-top: 2mm; }
+        }
     </style>
 
 </head>
@@ -310,15 +385,61 @@
                 </div>
             </div>
 
-            <!-- Category Filter -->
-            <div class="filter-bar" id="product-filter-bar">
-                <button class="filter-btn active" onclick="filterProducts('All')">All Items</button>
-                <!-- Categories will be injected here -->
-            </div>
+            <div class="pos-container">
+                <div class="products-section">
+                    <!-- Category Filter -->
+                    <div class="filter-bar" id="product-filter-bar">
+                        <button class="filter-btn active" onclick="filterProducts('All')">All Items</button>
+                    </div>
 
-            <!-- Product Grid -->
-            <div class="product-grid" id="admin-product-grid">
-                <!-- Products will be injected here -->
+                    <!-- Product Grid -->
+                    <div class="product-grid" id="admin-product-grid"></div>
+                </div>
+
+                <!-- Quick Bill Sidebar -->
+                <aside class="bill-sidebar">
+                    <h3>Current Bill</h3>
+                    <div class="bill-items" id="bill-items-container">
+                        <p style="text-align: center; color: #999; padding-top: 2rem;">Click products to add</p>
+                    </div>
+                    <div class="bill-total">
+                        <div>
+                            <span>Total</span>
+                            <span id="bill-total-amount">₹0</span>
+                        </div>
+                    </div>
+                    <button class="btn primary" onclick="printReceipt()" style="width: 100%">Print & Checkout</button>
+                </aside>
+            </div>
+        </div>
+
+        <!-- Hidden Receipt for Printing -->
+        <div id="receipt-print" style="display: none;">
+            <div class="receipt-header">
+                <h2>COCHIN BAKERS</h2>
+                <p>Ph: +91 2345678909</p>
+                <p>Email: snajdsnd@gmail.com</p>
+                <p>FSSAI: rjfnjfnj | GST: dnejfnejfne</p>
+                <p id="receipt-date" style="margin-top: 2mm; font-weight: bold;"></p>
+            </div>
+            <table class="receipt-table">
+                <thead>
+                    <tr>
+                        <th style="width: 10%">#</th>
+                        <th style="width: 50%">Item</th>
+                        <th style="width: 15%">Qty</th>
+                        <th style="width: 25%; text-align: right;">Price</th>
+                    </tr>
+                </thead>
+                <tbody id="receipt-items"></tbody>
+            </table>
+            <div class="receipt-total">
+                <p><strong>Grand Total: ₹<span id="receipt-total-val"></span></strong></p>
+                <p>Status: PAID</p>
+            </div>
+            <div class="receipt-footer">
+                <p>Thank you for visiting COCHIN BAKERS!</p>
+                <p>Visit again soon!</p>
             </div>
         </div>
 
