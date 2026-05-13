@@ -365,6 +365,7 @@ window.printReceipt = () => {
                 <td>${i + 1}</td>
                 <td>${item.name}</td>
                 <td>${item.qty}</td>
+                <td style="text-align: right;">${item.price}</td>
                 <td style="text-align: right;">${itemTotal}</td>
             </tr>
         `;
