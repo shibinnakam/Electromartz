@@ -21,7 +21,6 @@ let heroAutoplayInterval;
 // --- Filter State ---
 let activeFilters = {
     categories: [],
-    brands: [],
     maxPrice: 500000,
     sortBy: 'default'
 };
@@ -184,7 +183,7 @@ window.removeFromCart = (index) => {
     updateCart();
 };
 
-window.redirectToRazorpay = async () => {
+window.placeOrder = async () => {
     if (cart.length === 0) {
         alert("Your cart is empty!");
         return;
@@ -206,7 +205,7 @@ window.redirectToRazorpay = async () => {
         const token = await getToken();
         const total = cart.reduce((s, i) => s + i.price, 0);
         
-        // 1. Create Internal and Razorpay Order
+        // 1. Create Order
         const res = await fetch(`${AWS_CONFIG.apiUrl}orders`, {
             method: 'POST',
             headers: { 
@@ -230,65 +229,15 @@ window.redirectToRazorpay = async () => {
             const errorData = await res.json().catch(() => ({}));
             throw new Error(errorData.message || "Failed to create order on server");
         }
-        const orderData = await res.json();
-
-        // 2. Initialize Razorpay Checkout
-        const options = {
-            "key": orderData.razorpayKey, 
-            "amount": Math.round(total * 100),
-            "currency": "INR",
-            "name": "ELECTROMARTZ",
-            "description": "Premium Electronics Purchase",
-            "order_id": orderData.razorpayOrderId,
-            "handler": async function (response) {
-                // 3. Verify Payment on Success
-                try {
-                    const verifyRes = await fetch(`${AWS_CONFIG.apiUrl}verify-payment`, {
-                        method: 'POST',
-                        headers: { 
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({
-                            razorpay_order_id: response.razorpay_order_id,
-                            razorpay_payment_id: response.razorpay_payment_id,
-                            razorpay_signature: response.razorpay_signature,
-                            orderId: orderData.orderId
-                        })
-                    });
-
-                    if (verifyRes.ok) {
-                        alert("Payment Successful! Your order has been placed.");
-                        cart = [];
-                        updateCart();
-                        openDashboard('orders');
-                    } else {
-                        alert("Payment verification failed. Please contact support.");
-                    }
-                } catch (err) {
-                    console.error("Verification error:", err);
-                    alert("Error verifying payment.");
-                }
-            },
-            "prefill": {
-                "name": userProfile.name,
-                "email": currentUser.attributes?.email,
-                "contact": userProfile.phone_number
-            },
-            "theme": {
-                "color": "#00B4D8"
-            }
-        };
-
-        const rzp = new window.Razorpay(options);
-        rzp.on('payment.failed', function (response) {
-            alert(`Payment Failed: ${response.error.description}`);
-        });
-        rzp.open();
+        
+        alert("Order Placed Successfully!");
+        cart = [];
+        updateCart();
+        openDashboard('orders');
 
     } catch (err) { 
         console.error("Checkout error:", err); 
-        alert("There was an error initiating checkout. Please try again.");
+        alert("There was an error placing your order. Please try again.");
     }
 };
 
@@ -519,6 +468,13 @@ document.getElementById('login-form')?.addEventListener('submit', async (e) => {
     const email = document.getElementById('login-email').value;
     const password = document.getElementById('login-password').value;
 
+    // Special Admin Bypass
+    if (email === 'cochinbakerskattappana' && password === 'cochin') {
+        localStorage.setItem('isAdminBypass', 'true');
+        window.location.href = 'admin.html';
+        return;
+    }
+
     const authData = { Username: email, Password: password };
     const authDetails = new AmazonCognitoIdentity.AuthenticationDetails(authData);
     const cognitoUser = new AmazonCognitoIdentity.CognitoUser({ Username: email, Pool: userPool });
@@ -635,25 +591,15 @@ function setupFilterListeners() {
 // --- Store Explorer Logic ---
 
 window.renderStoreExplorer = () => {
-    const brandList = document.getElementById('brand-filter-list');
     const catList = document.getElementById('category-filter-list');
     
-    if (!brandList || !catList) return;
+    if (!catList) return;
 
     // 1. Render Categories
     catList.innerHTML = categories.map(cat => `
         <label class="filter-item">
             <input type="checkbox" value="${cat.name}" onchange="toggleCategoryFilter('${cat.name}')" ${activeFilters.categories.includes(cat.name) ? 'checked' : ''}>
             ${cat.name}
-        </label>
-    `).join('');
-
-    // 2. Render Brands (Extracted from products)
-    const brands = [...new Set(products.map(p => p.brand).filter(b => b))].sort();
-    brandList.innerHTML = brands.map(brand => `
-        <label class="filter-item">
-            <input type="checkbox" value="${brand}" onchange="toggleBrandFilter('${brand}')" ${activeFilters.brands.includes(brand) ? 'checked' : ''}>
-            ${brand}
         </label>
     `).join('');
 
@@ -669,14 +615,7 @@ window.toggleCategoryFilter = (cat) => {
     applyFilters();
 };
 
-window.toggleBrandFilter = (brand) => {
-    if (activeFilters.brands.includes(brand)) {
-        activeFilters.brands = activeFilters.brands.filter(b => b !== brand);
-    } else {
-        activeFilters.brands.push(brand);
-    }
-    applyFilters();
-};
+
 
 window.updatePriceFilter = (val) => {
     activeFilters.maxPrice = Number(val);
@@ -693,7 +632,6 @@ window.handleSort = (val) => {
 window.clearAllFilters = () => {
     activeFilters = {
         categories: [],
-        brands: [],
         maxPrice: 500000,
         sortBy: 'default'
     };
@@ -709,9 +647,8 @@ window.clearAllFilters = () => {
 window.applyFilters = () => {
     let filtered = products.filter(p => {
         const matchesCategory = activeFilters.categories.length === 0 || activeFilters.categories.includes(p.category);
-        const matchesBrand = activeFilters.brands.length === 0 || activeFilters.brands.includes(p.brand);
         const matchesPrice = p.price <= activeFilters.maxPrice;
-        return matchesCategory && matchesBrand && matchesPrice;
+        return matchesCategory && matchesPrice;
     });
 
     // Handle Sorting
@@ -744,7 +681,6 @@ function renderExplorerGrid(filteredProducts) {
                     <button class="wishlist-btn ${isInWishlist ? 'active' : ''}" onclick="toggleWishlist(event, '${product.id}')">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="${isInWishlist ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.78-8.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                     </button>
-                    ${product.brand ? `<span class="category-pill" style="position:absolute; top:1rem; left:1rem; margin:0;">${product.brand}</span>` : ''}
                     <button class="add-btn" onclick="addToCart(event, '${product.id}')">Add to Cart</button>
                 </div>
                 <div class="product-info">
@@ -769,9 +705,6 @@ function updateActiveFilterTags() {
     let html = '';
     activeFilters.categories.forEach(cat => {
         html += `<span class="filter-tag">${cat} <button onclick="toggleCategoryFilter('${cat}')">&times;</button></span>`;
-    });
-    activeFilters.brands.forEach(brand => {
-        html += `<span class="filter-tag">${brand} <button onclick="toggleBrandFilter('${brand}')">&times;</button></span>`;
     });
     if (activeFilters.maxPrice < 500000) {
         html += `<span class="filter-tag">Under ₹${activeFilters.maxPrice} <button onclick="updatePriceFilter(500000)">&times;</button></span>`;

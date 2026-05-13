@@ -308,85 +308,29 @@
             </div>
             <div class="admin-form-card">
                 <form id="add-product-form">
-                    <h3>1. Basic Information</h3>
+                    <h3>Basic Information</h3>
                     <div class="form-group">
                         <label>Product Name</label>
                         <input type="text" id="p-name" required>
                     </div>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem">
-                        <div class="form-group">
-                            <label>Brand (Sub-category)</label>
-                            <select id="p-brand" required>
-                                <option value="">Select Category First</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Category</label>
-                            <select id="p-category" required>
-                                <option value="">Select Category</option>
-                            </select>
-                        </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="p-category" required>
+                            <option value="">Select Category</option>
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label>Description</label>
-                        <textarea id="p-desc" rows="4" required></textarea>
+                        <label>Price (₹) [Max: 1000, Min: 1]</label>
+                        <input type="number" id="p-price" min="1" max="1000" required>
                     </div>
                     
-                    <h3>2. Pricing & Stock</h3>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:1.5rem">
-                        <div class="form-group">
-                            <label>Selling Price (₹)</label>
-                            <input type="number" id="p-price" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Original Price (₹)</label>
-                            <input type="number" id="p-original-price">
-                        </div>
-                        <div class="form-group">
-                            <label>Stock Status</label>
-                            <select id="p-stock" required>
-                                <option value="true">In Stock</option>
-                                <option value="false">Out of Stock</option>
-                            </select>
-                        </div>
+                    <div class="form-group">
+                        <label>Product Image</label>
+                        <input type="file" id="p-image-file" accept="image/png, image/jpeg, image/jpg" required>
                     </div>
-
-                    <h3>3. Media (Images)</h3>
-                    <div id="image-inputs-container">
-                        <div class="form-group image-input-row" style="display:flex; gap:1rem;">
-                            <input type="text" class="p-image-url" placeholder="https://..." required style="flex:1;">
-                            <button type="button" class="btn secondary" onclick="addInputRow('image-inputs-container', 'image', 'https://...')">+</button>
-                        </div>
-                    </div>
-
-                    <h3>4. Key Highlights</h3>
-                    <div id="highlight-inputs-container">
-                        <div class="form-group highlight-input-row" style="display:flex; gap:1rem;">
-                            <input type="text" class="p-highlight" placeholder="e.g. 5000 mAh Battery" required style="flex:1;">
-                            <button type="button" class="btn secondary" onclick="addInputRow('highlight-inputs-container', 'highlight', 'e.g. 5000 mAh Battery')">+</button>
-                        </div>
-                    </div>
-
-                    <h3>5. Specifications</h3>
-                    <div id="specs-container">
-                        <div class="spec-section">
-                            <div class="form-group" style="display:flex; justify-content: space-between; align-items: center;">
-                                <input type="text" class="p-spec-section-name" placeholder="Section Name (e.g., General)" style="width: 50%;" required>
-                                <button type="button" class="btn secondary" style="background: #fee2e2; color: #dc2626; border-color: #fca5a5;" onclick="this.parentElement.parentElement.remove()">Remove Section</button>
-                            </div>
-                            <div class="spec-rows-container">
-                                <div class="form-group spec-input-row" style="display:flex; gap:1rem; align-items: center; margin-top:0.5rem">
-                                    <input type="text" class="p-spec-key" placeholder="Key (e.g. Model Name)" required style="flex:1;">
-                                    <input type="text" class="p-spec-value" placeholder="Value (e.g. Z9 5G)" required style="flex:1;">
-                                    <button type="button" class="btn secondary" onclick="addSpecRow(this)">+</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <button type="button" class="btn secondary" style="margin-bottom: 1.5rem;" onclick="addSpecSection()">+ Add Specification Section</button>
 
                     <hr>
-                    <button type="submit" class="btn primary" style="width:100%; font-size: 1rem; padding: 0.9rem;">Save Product to Cloud</button>
+                    <button type="submit" class="btn primary" style="width:100%; font-size: 1rem; padding: 0.9rem;">Add Product</button>
                 </form>
             </div>
         </div>
@@ -405,34 +349,10 @@
                         <label>Category Name (Letters Only)</label>
                         <input type="text" id="c-name" placeholder="e.g. Laptops" required>
                     </div>
-                    <div class="form-group">
-                        <label>Category Image</label>
-                        <input type="url" id="c-image-url" placeholder="https://...">
-                        <input type="file" id="c-image-file" accept="image/*" style="margin-top:0.5rem;">
-                    </div>
                     <button type="submit" class="btn primary" style="width:100%">Create Category</button>
                 </form>
 
-                <hr>
-                <h3>2. Add Sub-category / Brand</h3>
-                <form id="add-subcategory-form">
-                    <div class="form-group">
-                        <label>Parent Category</label>
-                        <select id="sc-category" required>
-                            <option value="">Select Category</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Sub-category Name (e.g., Brand)</label>
-                        <input type="text" id="sc-name" placeholder="e.g. Lenovo" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Sub-category Image</label>
-                        <input type="url" id="sc-image-url" placeholder="https://...">
-                        <input type="file" id="sc-image-file" accept="image/*" style="margin-top:0.5rem;">
-                    </div>
-                    <button type="submit" class="btn primary" style="width:100%">Add Sub-category</button>
-                </form>
+
 
                 <h3 class="section-title">Existing Categories</h3>
                 <div id="category-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem">
@@ -447,207 +367,6 @@
                     <h1>Customer Orders</h1>
                     <p>Review and manage all customer orders.</p>
                 </div>
-            </div>
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>Order ID</th>
-                        <th>Customer ID</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
-                <tbody id="orders-list">
-                    <!-- Data injected by JS -->
-                </tbody>
-            </table>
-        </div>
-    </main>
-
-    <script src="admin.js"></script>
-</body>
-</html>
-
-
-    <main class="admin-main">
-        <div id="overview" class="tab-content active">
-            <div class="dashboard-header">
-                <div>
-                    <h1 class="gradient-text">Store Overview</h1>
-                    <p>Welcome back, Administrator.</p>
-                </div>
-                <button class="btn primary" onclick="switchTab('products-tab')">+ Add Item</button>
-            </div>
-
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem">
-                <div class="stat-card">
-                    <h4>Total Products</h4>
-                    <span class="value" id="stat-products">0</span>
-                </div>
-                <div class="stat-card">
-                    <h4>Categories</h4>
-                    <span class="value" id="stat-categories">0</span>
-                </div>
-                <div class="stat-card">
-                    <h4>Active API</h4>
-                    <span class="value" style="color: var(--secondary)">ONLINE</span>
-                </div>
-            </div>
-
-            <h3 style="margin-top: 3rem">Recently Added Products</h3>
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>Category</th>
-                        <th>Price</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="recent-products-table">
-                    <!-- Data injected by JS -->
-                </tbody>
-            </table>
-        </div>
-
-        <div id="products-tab" class="tab-content">
-            <div class="dashboard-header">
-                <h1 class="gradient-text">Manage Products</h1>
-            </div>
-            <div class="admin-form-card">
-                <form id="add-product-form">
-                    <h3 style="margin-bottom: 1rem; color: var(--primary);">1. Basic Information</h3>
-                    <div class="form-group">
-                        <label>Product Name</label>
-                        <input type="text" id="p-name" required>
-                    </div>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem">
-                        <div class="form-group">
-                            <label>Brand (Sub-category)</label>
-                            <select id="p-brand" required>
-                                <option value="">Select Category First</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Category</label>
-                            <select id="p-category" required>
-                                <option value="">Select Category</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Description</label>
-                        <textarea id="p-desc" rows="4" required></textarea>
-                    </div>
-                    
-                    <h3 style="margin: 2rem 0 1rem; color: var(--primary);">2. Pricing & Stock</h3>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:1.5rem">
-                        <div class="form-group">
-                            <label>Selling Price (₹)</label>
-                            <input type="number" id="p-price" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Original Price (₹) [Optional]</label>
-                            <input type="number" id="p-original-price">
-                        </div>
-                        <div class="form-group">
-                            <label>Stock Status</label>
-                            <select id="p-stock" required>
-                                <option value="true">In Stock</option>
-                                <option value="false">Out of Stock</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <h3 style="margin: 2rem 0 1rem; color: var(--primary);">3. Media (Images)</h3>
-                    <div id="image-inputs-container">
-                        <div class="form-group image-input-row" style="display:flex; gap:1rem;">
-                            <input type="text" class="p-image-url" placeholder="https://..." required style="flex:1;">
-                            <button type="button" class="btn secondary" onclick="addInputRow('image-inputs-container', 'image', 'https://...')">+</button>
-                        </div>
-                    </div>
-
-                    <h3 style="margin: 2rem 0 1rem; color: var(--primary);">4. Key Highlights</h3>
-                    <div id="highlight-inputs-container">
-                        <div class="form-group highlight-input-row" style="display:flex; gap:1rem;">
-                            <input type="text" class="p-highlight" placeholder="e.g. 5000 mAh Battery" required style="flex:1;">
-                            <button type="button" class="btn secondary" onclick="addInputRow('highlight-inputs-container', 'highlight', 'e.g. 5000 mAh Battery')">+</button>
-                        </div>
-                    </div>
-
-                    <h3 style="margin: 2rem 0 1rem; color: var(--primary);">5. Specifications</h3>
-                    <div id="specs-container">
-                        <p style="color: rgba(255,255,255,0.6); margin-bottom: 1rem;">Add grouped specifications like "General" or "Display Features".</p>
-                        <div class="spec-section" style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem;">
-                            <div class="form-group" style="display:flex; justify-content: space-between; align-items: center;">
-                                <input type="text" class="p-spec-section-name" placeholder="Section Name (e.g., General)" style="width: 50%;" required>
-                                <button type="button" class="btn secondary" style="background: #ff4757; color: white; border-color: transparent;" onclick="this.parentElement.parentElement.remove()">Remove Section</button>
-                            </div>
-                            <div class="spec-rows-container">
-                                <div class="form-group spec-input-row" style="display:flex; gap:1rem; align-items: center; margin-top:0.5rem">
-                                    <input type="text" class="p-spec-key" placeholder="Key (e.g. Model Name)" required style="flex:1;">
-                                    <input type="text" class="p-spec-value" placeholder="Value (e.g. Z9 5G)" required style="flex:1;">
-                                    <button type="button" class="btn secondary" onclick="addSpecRow(this)">+</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <button type="button" class="btn secondary" style="margin-bottom: 2rem;" onclick="addSpecSection()">+ Add Another Specification Section</button>
-
-                    <button type="submit" class="btn primary" style="width:100%; font-size: 1.1rem; padding: 1rem;">Save Detailed Product to Cloud</button>
-                </form>
-            </div>
-        </div>
-
-        <div id="categories-tab" class="tab-content">
-            <div class="dashboard-header">
-                <h1 class="gradient-text">Manage Categories</h1>
-            </div>
-            <div class="admin-form-card">
-                <form id="add-category-form">
-                    <div class="form-group">
-                        <label>Category Name (Letters Only)</label>
-                        <input type="text" id="c-name" placeholder="e.g. Laptops" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Image</label>
-                        <input type="url" id="c-image-url" placeholder="https://... (or upload below)">
-                        <input type="file" id="c-image-file" accept="image/*" style="margin-top:0.5rem; color: #fff;">
-                    </div>
-                    <button type="submit" class="btn primary" style="width:100%">Create New Category</button>
-                </form>
-
-                <hr style="margin: 3rem 0; border: 0; border-top: 1px solid rgba(255,255,255,0.1);">
-                <h2 class="gradient-text" style="margin-bottom: 1.5rem">Add Sub-category</h2>
-                <form id="add-subcategory-form">
-                    <div class="form-group">
-                        <label>Parent Category</label>
-                        <select id="sc-category" required>
-                            <option value="">Select Category</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Sub-category Name (e.g., Brand)</label>
-                        <input type="text" id="sc-name" placeholder="e.g. Lenovo" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Image</label>
-                        <input type="url" id="sc-image-url" placeholder="https://... (or upload below)">
-                        <input type="file" id="sc-image-file" accept="image/*" style="margin-top:0.5rem; color: #fff;">
-                    </div>
-                    <button type="submit" class="btn primary" style="width:100%">Add Sub-category</button>
-                </form>
-
-                <h3 style="margin-top:3rem">Existing Categories</h3>
-                <div id="category-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem">
-                    <!-- Injected by JS -->
-                </div>
-            </div>
-        </div>
-        <div id="orders-tab" class="tab-content">
-            <div class="dashboard-header">
-                <h1 class="gradient-text">Customer Orders</h1>
             </div>
             <table class="admin-table">
                 <thead>

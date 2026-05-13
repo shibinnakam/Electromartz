@@ -54,7 +54,7 @@
                 <span>Total:</span>
                 <span id="cart-total">₹0</span>
             </div>
-            <button class="checkout-btn" onclick="redirectToRazorpay()">Proceed to Checkout</button>
+            <button class="checkout-btn" onclick="placeOrder()">Place Order</button>
         </div>
     </div>
     <div id="cart-overlay"></div>
@@ -192,8 +192,8 @@
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                         </div>
                         <div class="feature-text-block">
-                            <h4>Secure Payments</h4>
-                            <p>Fully encrypted transactions</p>
+                            <h4>Direct Ordering</h4>
+                            <p>Simplified checkout process</p>
                         </div>
                     </div>
                     <div class="feature-block reveal-up">
@@ -220,35 +220,35 @@
                         <img src="assets/echo-buds.png" alt="Premium Audio">
                         <div class="promo-text">
                             <p>Limited Edition</p>
-                            <h3>Premium Studio Audio</h3>
-                            <a href="javascript:switchView('store', 'Audio')">Explore Now</a>
+                            <h3>Premium Audio</h3>
+                            <a href="javascript:switchView('store')">Explore Now</a>
                         </div>
                     </div>
                     <div class="horiz-banner">
                         <div class="promo-text">
                             <p>Next Gen</p>
-                            <h3>Smart Wearables</h3>
-                            <a href="javascript:switchView('store', 'Wearables')">Shop Now</a>
+                            <h3>Smart Tech</h3>
+                            <a href="javascript:switchView('store')">Shop Now</a>
                         </div>
                         <img src="https://images.unsplash.com/photo-1579586337278-3befd40fd17a?auto=format&fit=crop&q=80&w=1000" alt="Smart Watch">
                     </div>
                     <div class="square-banner">
                         <img src="https://placehold.co/200x200/252525/FFFFFF?text=Lenses" alt="Visual Gear">
                         <div class="promo-text">
-                            <h3 onclick="switchView('store', 'Mobile')" style="cursor:pointer">Optical Precision</h3>
+                            <h3 onclick="switchView('store')" style="cursor:pointer">Visual Gears</h3>
                         </div>
                     </div>
                     <div class="square-banner">
                         <img src="https://placehold.co/200x200/252525/FFFFFF?text=Tablets" alt="Pro Tablets">
                         <div class="promo-text">
-                            <h3 onclick="switchView('store', 'Mobile')" style="cursor:pointer">Productivity Tools</h3>
+                            <h3 onclick="switchView('store')" style="cursor:pointer">Productivity</h3>
                         </div>
                     </div>
                     <div class="horiz-banner">
                         <div class="promo-text">
                             <p>Ultra Response</p>
-                            <h3>Gaming Peripherals</h3>
-                            <a href="javascript:switchView('store', 'Mobile')">Play Better</a>
+                            <h3>Gaming</h3>
+                            <a href="javascript:switchView('store')">Play Better</a>
                         </div>
                         <img src="https://images.unsplash.com/photo-1600080972464-8e5f35802d3e?auto=format&fit=crop&q=80&w=1000" alt="Gamepad">
                     </div>
@@ -289,12 +289,7 @@
                             </div>
                         </div>
 
-                        <div class="filter-group">
-                            <h4>Brand</h4>
-                            <div id="brand-filter-list" class="filter-options">
-                                <!-- Brands injected here -->
-                            </div>
-                        </div>
+
 
                         <div class="filter-group">
                             <h4>Price Range</h4>
@@ -585,7 +580,7 @@
         </div>
     </div>
 
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
     <script src="app.js"></script>
 </body>
 </html>
