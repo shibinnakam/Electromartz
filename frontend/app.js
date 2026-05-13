@@ -2,9 +2,9 @@
 // Note: REPLACE these values with your actual AWS resource IDs after deployment
 const AWS_CONFIG = {
     region: 'ap-south-1',
-    userPoolId: 'ap-south-1_1CmJ2GeNh',
-    clientId: '42dovnuj79hnha44se0r9q52d7',
-    apiUrl: 'https://diixpyzogj.execute-api.ap-south-1.amazonaws.com/Prod/'
+    userPoolId: 'ap-south-1_2Aw1sbuoH',
+    clientId: '7pldaqon8t9d5nok2qhe0rt58n',
+    apiUrl: 'https://d8xrjr2r9h.execute-api.ap-south-1.amazonaws.com/Prod/'
 };
 
 // --- State Management ---
