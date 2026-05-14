@@ -204,13 +204,39 @@ function setupEventListeners() {
         }
     });
 
-    // Image utility
+    // Image utility with compression for DynamoDB limits (400KB)
     const getImageData = async (urlInputId, fileInputId) => {
         const fileInput = document.getElementById(fileInputId);
         if (fileInput && fileInput.files && fileInput.files[0]) {
             return new Promise((resolve) => {
                 const reader = new FileReader();
-                reader.onload = (e) => resolve(e.target.result);
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        const maxSide = 800; // Resize to max 800px
+
+                        if (width > height && width > maxSide) {
+                            height *= maxSide / width;
+                            width = maxSide;
+                        } else if (height > maxSide) {
+                            width *= maxSide / height;
+                            height = maxSide;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Convert to compressed JPEG
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                        resolve(dataUrl);
+                    };
+                    img.src = e.target.result;
+                };
                 reader.readAsDataURL(fileInput.files[0]);
             });
         }
