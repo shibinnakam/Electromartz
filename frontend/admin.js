@@ -141,7 +141,8 @@ function renderDashboard() {
 
     // Orders List
     const ordersList = document.getElementById('orders-list');
-    ordersList.innerHTML = orders.slice().reverse().map(o => `
+    const ordersArray = Array.isArray(orders) ? orders : [];
+    ordersList.innerHTML = ordersArray.slice().reverse().map(o => `
         <tr>
             <td>#${o.orderId}</td>
             <td>${o.userId}</td>
