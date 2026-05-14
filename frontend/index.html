@@ -12,28 +12,6 @@
     <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.1/dist/amazon-cognito-identity.min.js"></script>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav id="navbar">
-        <div class="container nav-container">
-            <a href="#" class="logo">COCHIN<span>BAKERS</span></a>
-            <button id="mobile-menu-btn" class="mobile-toggle">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-            <ul class="nav-links">
-                <li><a href="javascript:switchView('store')">STORE</a></li>
-                <li><a href="#about">ABOUT</a></li>
-                <li><a href="javascript:switchView('store')">PRODUCTS</a></li>
-                <li><a href="#footer">CONTACT</a></li>
-            </ul>
-            <div class="nav-actions">
-                <div id="user-section">
-                    <button id="login-btn" onclick="openAuthModal()" class="btn login-pill">LOGIN</button>
-                </div>
-            </div>
-        </div>
-    </nav>
 
     <!-- Cart Sidebar Overlay -->
     <div id="cart-sidebar" class="glass">
@@ -121,7 +99,7 @@
                 <div class="modal-content" style="max-width: 500px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-radius: 20px;">
                     
                     <div id="login-form-container">
-                        <img src="https://placehold.co/200x80/white/E31837?text=COCHIN+BAKERS" alt="Cochin Bakers Logo" class="auth-logo" style="margin: 0 auto 20px; display: block;">
+                        <h1 style="text-align: center; font-family: 'Outfit'; color: var(--accent-primary); margin-bottom: 30px;">ELECTRO<span>MARTZ</span></h1>
                         <h2 style="text-align: center; margin-bottom: 10px;">Login</h2>
                         <p class="auth-subtitle" style="text-align: center;">Don't have an account? <span onclick="toggleAuthMode('signup')" style="cursor: pointer; color: #E31837; font-weight: bold;">Create an account</span></p>
                         
@@ -132,24 +110,15 @@
                             <div class="form-group">
                                 <input type="password" id="login-password" placeholder="Enter password" required>
                             </div>
-                            <span class="forgot-link" style="display: block; text-align: right; margin-bottom: 20px; color: #666; cursor: pointer; font-size: 0.9rem;">Forgot your password?</span>
                             <button type="submit" class="auth-btn-primary" style="width: 100%;">Login</button>
                         </form>
-
-                        <div class="auth-divider">OR</div>
-
-                        <button class="auth-btn-google" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_Logo.svg" alt="Google" style="width: 20px;">
-                            Continue with Google
-                        </button>
-
                         <div class="auth-footer" style="text-align: center; margin-top: 20px; font-size: 0.8rem; color: #999;">
-                            &copy; 2026 CochinBakers. All rights reserved.
+                            &copy; 2026 ELECTROMARTZ. All rights reserved.
                         </div>
                     </div>
 
                     <div id="signup-form-container" style="display:none">
-                        <img src="https://placehold.co/200x80/white/E31837?text=COCHIN+BAKERS" alt="Cochin Bakers Logo" class="auth-logo" style="margin: 0 auto 20px; display: block;">
+                        <h1 style="text-align: center; font-family: 'Outfit'; color: var(--accent-primary); margin-bottom: 30px;">ELECTRO<span>MARTZ</span></h1>
                         <h2 style="text-align: center; margin-bottom: 10px;">Create Account</h2>
                         <p class="auth-subtitle" style="text-align: center;">Already have an account? <span onclick="toggleAuthMode('login')" style="cursor: pointer; color: #E31837; font-weight: bold;">Login</span></p>
                         
@@ -256,40 +225,6 @@
             </div>
         </section>
 
-        <!-- Footer -->
-        <footer id="footer" class="section-padding">
-            <div class="container">
-                <div class="footer-grid">
-                    <div class="footer-brand">
-                        <div class="logo">ELECTROMARTZ<span>.</span></div>
-                        <p>Elevating your lifestyle through cutting-edge technology and premium electronics.</p>
-                    </div>
-                    <div class="footer-links">
-                        <h4>Shop</h4>
-                        <a href="javascript:switchView('store')">Store Explorer</a>
-                        <a href="#categories">Featured Categories</a>
-                        <a href="javascript:switchView('store')">New Arrivals</a>
-                    </div>
-                    <div class="footer-links">
-                        <h4>Account</h4>
-                        <a href="javascript:switchView('user-page')">My Profile</a>
-                        <a href="javascript:openDashboard('orders')">Order History</a>
-                        <a href="javascript:openDashboard('wishlist')">Wishlist</a>
-                    </div>
-                    <div class="footer-links">
-                        <h4>Newsletter</h4>
-                        <p>Subscribe for exclusive tech deals.</p>
-                        <form class="newsletter-mini">
-                            <input type="email" placeholder="Email address">
-                            <button type="submit">Go</button>
-                        </form>
-                    </div>
-                </div>
-                <div class="footer-bottom">
-                    <p>&copy; 2026 ELECTROMARTZ. ALL RIGHTS RESERVED.</p>
-                </div>
-            </div>
-        </footer>
 
     <!-- Admin modal removed. Use admin.html for dashboard. -->
 

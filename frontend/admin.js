@@ -240,15 +240,22 @@ function setupEventListeners() {
         } else {
             const err = await res.json();
             alert(err.message || "Error creating category");
-        }
-    });
+        }    });
 
-
+    // Edit Product
+    document.getElementById('edit-product-form')?.addEventListener('submit', handleEditProduct);
 }
+
+window.toggleAdminSidebar = () => {
+    document.querySelector('.admin-sidebar').classList.toggle('active');
+};
 
 window.switchTab = (tabId) => {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+
+    // Close sidebar on mobile after clicking
+    document.querySelector('.admin-sidebar').classList.remove('active');
 
     document.getElementById(tabId).classList.add('active');
     // Mark sidebar link as active
@@ -394,4 +401,105 @@ window.printReceipt = () => {
     updateBillUI();
 };
 
+function renderAllProducts() {
+    const tableBody = document.getElementById('all-products-list');
+    if (!tableBody) return;
 
+    tableBody.innerHTML = products.slice().reverse().map(p => `
+        <tr>
+            <td>
+                <div style="display:flex; align-items:center; gap:1rem">
+                    <img src="${p.image}" style="width:40px; height:40px; border-radius:8px; object-fit:cover" onerror="this.src='https://placehold.co/40px'">
+                    <span>${p.name}</span>
+                </div>
+            </td>
+            <td>${p.category}</td>
+            <td>₹${p.price}</td>
+            <td>
+                <button class="action-btn btn-edit" onclick="openEditModal('${p.id}')">Edit</button>
+                <button class="action-btn btn-delete" onclick="deleteProduct('${p.id}')">Delete</button>
+            </td>
+        </tr>
+    `).join('') || '<tr><td colspan="4">No products found.</td></tr>';
+}
+
+window.openEditModal = (productId) => {
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+
+    document.getElementById('edit-p-id').value = product.id;
+    document.getElementById('edit-p-name').value = product.name;
+    document.getElementById('edit-p-price').value = product.price;
+    
+    const catSelect = document.getElementById('edit-p-category');
+    catSelect.innerHTML = categories.map(cat => `<option value="${cat.name}" ${cat.name === product.category ? 'selected' : ''}>${cat.name}</option>`).join('');
+    
+    document.getElementById('edit-modal').style.display = 'flex';
+};
+
+window.closeEditModal = () => {
+    document.getElementById('edit-modal').style.display = 'none';
+};
+
+async function handleEditProduct(e) {
+    e.preventDefault();
+    const id = document.getElementById('edit-p-id').value;
+    const name = document.getElementById('edit-p-name').value;
+    const category = document.getElementById('edit-p-category').value;
+    const price = parseFloat(document.getElementById('edit-p-price').value);
+
+    const product = products.find(p => p.id === id);
+    const updatedData = {
+        ...product,
+        name,
+        category,
+        price
+    };
+
+    try {
+        const token = await getToken();
+        const res = await fetch(`${AWS_CONFIG.apiUrl}products/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(updatedData)
+        });
+
+        if (res.ok) {
+            alert("Product updated successfully!");
+            closeEditModal();
+            loadData();
+        } else {
+            alert("Failed to update product.");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Error updating product.");
+    }
+}
+
+window.deleteProduct = async (productId) => {
+    if (!confirm("Are you sure you want to permanently delete this product?")) return;
+
+    try {
+        const token = await getToken();
+        const res = await fetch(`${AWS_CONFIG.apiUrl}products/${productId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (res.ok) {
+            alert("Product deleted successfully!");
+            loadData();
+        } else {
+            alert("Failed to delete product.");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Error deleting product.");
+    }
+};

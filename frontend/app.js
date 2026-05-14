@@ -38,6 +38,25 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function initApp() {
+    // Mobile Menu Toggle
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const navLinks = document.querySelector('.nav-links');
+    
+    if (mobileMenuBtn && navLinks) {
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenuBtn.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+
+        // Close menu on link click
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenuBtn.classList.remove('active');
+                navLinks.classList.remove('active');
+            });
+        });
+    }
+
     setupEventListeners();
     await checkUserSession();
     await loadInitialData();
@@ -312,15 +331,17 @@ function getToken() {
 function updateAuthUI(isLoggedIn) {
     const userSection = document.getElementById('user-section');
     if (isLoggedIn && currentUser) {
-        userSection.innerHTML = `
-            <div class="user-info-group">
-                <button onclick="openDashboard('profile')" class="user-pill">
-                    <span>${userProfile.name ? userProfile.name.split(' ')[0] : 'Account'}</span>
-                </button>
-                <div id="admin-badge-container"></div>
-                <button onclick="handleLogout()" class="logout-link">Logout</button>
-            </div>
-        `;
+        if (userSection) {
+            userSection.innerHTML = `
+                <div class="user-info-group">
+                    <button onclick="openDashboard('profile')" class="user-pill">
+                        <span>${userProfile.name ? userProfile.name.split(' ')[0] : 'Account'}</span>
+                    </button>
+                    <div id="admin-badge-container"></div>
+                    <button onclick="handleLogout()" class="logout-link">Logout</button>
+                </div>
+            `;
+        }
         
         // Personalize Navbar Links
         const navLinks = document.querySelector('.nav-links');
@@ -336,7 +357,9 @@ function updateAuthUI(isLoggedIn) {
         fetchWishlist();
         switchView('user-page');
     } else {
-        userSection.innerHTML = `<button id="login-btn" onclick="switchView('auth')" class="btn secondary">Login</button>`;
+        if (userSection) {
+            userSection.innerHTML = `<button id="login-btn" onclick="switchView('auth')" class="btn secondary">Login</button>`;
+        }
         switchView('auth');
     }
 }

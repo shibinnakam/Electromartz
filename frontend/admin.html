@@ -316,6 +316,54 @@
             .receipt-total { border-top: 1px dashed #000; padding-top: 2mm; text-align: right; }
             .receipt-footer { text-align: center; margin-top: 6mm; font-size: 8pt; border-top: 1px dashed #000; padding-top: 2mm; }
         }
+
+        /* --- Admin Responsive Styles --- */
+        @media (max-width: 1024px) {
+            :root { --admin-sidebar-width: 220px; }
+            .admin-main { padding: 2rem; }
+        }
+
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100vh;
+            }
+            .admin-sidebar.active {
+                transform: translateX(0);
+            }
+            .admin-main {
+                margin-left: 0 !important;
+                width: 100%;
+                padding: 1.5rem;
+            }
+            .dashboard-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+            .stat-grid { grid-template-columns: 1fr 1fr; }
+            
+            .admin-toggle-btn {
+                display: block !important;
+                margin-bottom: 1.5rem;
+                background: var(--admin-accent);
+                color: white;
+                padding: 0.6rem 1rem;
+                border-radius: 8px;
+                font-weight: 600;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stat-grid { grid-template-columns: 1fr; }
+            .admin-table-container { overflow-x: auto; }
+            .admin-form-card { padding: 1.5rem; }
+            .pos-container { flex-direction: column; }
+            .bill-sidebar { width: 100%; position: static; height: auto; margin-top: 2rem; }
+        }
+        
+        .admin-toggle-btn { display: none; }
     </style>
 
 </head>
@@ -336,6 +384,7 @@
     </aside>
 
     <main class="admin-main">
+        <button class="admin-toggle-btn" onclick="toggleAdminSidebar()">☰ Open Menu</button>
         <div id="overview" class="tab-content active">
             <div class="dashboard-header">
                 <div>
