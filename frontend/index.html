@@ -22,7 +22,7 @@
                 <span></span>
             </button>
             <ul class="nav-links">
-                <li><a href="javascript:switchView('home')">HOME</a></li>
+                <li><a href="javascript:switchView('store')">STORE</a></li>
                 <li><a href="#about">ABOUT</a></li>
                 <li><a href="javascript:switchView('store')">PRODUCTS</a></li>
                 <li><a href="#footer">CONTACT</a></li>
@@ -56,217 +56,7 @@
     <div id="cart-overlay"></div>
 
     <main>
-        <div class="dark-hero-wrapper">
-            <div class="hero-overlay"></div>
-            <section id="hero">
-                <div class="hero-slides">
-                    <div class="hero-slide active">
-                        <div class="container hero-container">
-                            <div class="hero-content">
-                                <span class="hero-tag">AUTHENTIC & FRESH</span>
-                                <h1>Premium <span>Bakery</span> Delights.</h1>
-                                <p>Experience the nexus of traditional baking and premium quality with the all-new Cochin Bakers signature collection.</p>
-                                <div class="cta-group">
-                                    <a href="javascript:switchView('store')" class="btn primary">View Products</a>
-                                    <a href="#about" class="btn secondary">Our Story</a>
-                                </div>
-                            </div>
-                            <div class="hero-image">
-                                <div class="glow-sphere"></div>
-                                <img src="https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=1926&auto=format&fit=crop" alt="Premium Bread">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-                    
-                    <!-- Slide 2: Mobile -->
-                    <div class="hero-slide" data-index="1">
-                        <div class="container hero-container">
-                            <div class="hero-content">
-                                <span class="hero-tag">Next-Gen Connectivity</span>
-                                <h1>Flagship <span>Performance</span> Defined.</h1>
-                                <p>Unleash limitless power and ultra-slim elegance with the new ELECTROMARTZ X-Series flagship smartphone.</p>
-                                <div class="cta-group">
-                                    <a href="#products" class="btn primary">Shop Phones</a>
-                                    <a href="#categories" class="btn secondary">Compare Models</a>
-                                </div>
-                            </div>
-                            <div class="hero-image">
-                                <div class="glow-sphere"></div>
-                                <img src="assets/titan-s24.png" alt="X-Series Smartphone">
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- Slide 3: Tablet -->
-                    <div class="hero-slide" data-index="2">
-                        <div class="container hero-container">
-                            <div class="hero-content">
-                                <span class="hero-tag">Creative Edge</span>
-                                <h1>The Canvas of <span>Future</span> Tech.</h1>
-                                <p>Elevate your productivity and creativity with the ultra-vivid Pro Tablet. Designed for the professionals of tomorrow.</p>
-                                <div class="cta-group">
-                                    <a href="javascript:switchView('store')" class="btn primary">Discover Tablets</a>
-                                    <a href="#categories" class="btn secondary">View Accessories</a>
-                                </div>
-                            </div>
-                            <div class="hero-image">
-                                <div class="glow-sphere"></div>
-                                <img src="assets/aero-tab.png" alt="Pro Tablet">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Slide 4: DSLR Camera -->
-                    <div class="hero-slide" data-index="3">
-                        <div class="container hero-container">
-                            <div class="hero-content">
-                                <span class="hero-tag reveal-up">Visual Perfection</span>
-                                <h1 class="reveal-up">Capture the <span>Unseen</span> Details.</h1>
-                                <p class="reveal-up">Precision engineering meets artistic vision. The all-new ELECTROMARTZ DSLR series for the master storyteller.</p>
-                                <div class="cta-group reveal-up">
-                                    <a href="javascript:switchView('store')" class="btn primary">Shop Cameras</a>
-                                    <a href="#categories" class="btn secondary">Lens Collection</a>
-                                </div>
-                            </div>
-                            <div class="hero-image">
-                                <div class="glow-sphere"></div>
-                                <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=1000" alt="Professional DSLR Camera">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Slide 5: Laptop -->
-                    <div class="hero-slide" data-index="4">
-                        <div class="container hero-container">
-                            <div class="hero-content">
-                                <span class="hero-tag reveal-up">Power & Portability</span>
-                                <h1 class="reveal-up">Creative <span>Limitless</span> Workspace.</h1>
-                                <p class="reveal-up">Experience the raw power of the all-new ELECTROMARTZ Pro Laptop. Engineered for those who build the future.</p>
-                                <div class="cta-group reveal-up">
-                                    <a href="#products" class="btn primary">Shop Laptops</a>
-                                    <a href="#categories" class="btn secondary">Tech Specs</a>
-                                </div>
-                            </div>
-                            <div class="hero-image">
-                                <div class="glow-sphere"></div>
-                                <img src="https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&q=80&w=1000" alt="Premium Pro Laptop">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="hero-nav">
-                    <div class="hero-prev" onclick="prevSlide()">&#10094;</div>
-                    <div class="hero-next" onclick="nextSlide()">&#10095;</div>
-                </div>
-                
-                <div class="hero-pagination">
-                    <span class="dot active" onclick="goToSlide(0)"></span>
-                    <span class="dot" onclick="goToSlide(1)"></span>
-                    <span class="dot" onclick="goToSlide(2)"></span>
-                    <span class="dot" onclick="goToSlide(3)"></span>
-                    <span class="dot" onclick="goToSlide(4)"></span>
-                </div>
-            </section>
-        </div>
-
-        <div class="features-wrapper">
-            <div class="container">
-                <div class="features-container">
-                    <div class="feature-block reveal-up">
-                        <div class="feature-icon-wrapper">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                        </div>
-                        <div class="feature-text-block">
-                            <h4>Global Delivery</h4>
-                            <p>Fast shipping to 120+ countries</p>
-                        </div>
-                    </div>
-                    <div class="feature-block reveal-up">
-                        <div class="feature-icon-wrapper">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                        </div>
-                        <div class="feature-text-block">
-                            <h4>Direct Ordering</h4>
-                            <p>Simplified checkout process</p>
-                        </div>
-                    </div>
-                    <div class="feature-block reveal-up">
-                        <div class="feature-icon-wrapper">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-                        </div>
-                        <div class="feature-text-block">
-                            <h4>24/7 Support</h4>
-                            <p>Expert assistance anytime</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <section id="categories" class="section-padding">
-            <div class="container">
-                <div class="section-header reveal-up">
-                    <span class="hero-tag">Curated Collections</span>
-                    <h2>Featured <span>Categories</span></h2>
-                </div>
-                <div class="promo-grid">
-                    <div class="tall-banner">
-                        <img src="assets/echo-buds.png" alt="Premium Audio">
-                        <div class="promo-text">
-                            <p>Limited Edition</p>
-                            <h3>Premium Audio</h3>
-                            <a href="javascript:switchView('store')">Explore Now</a>
-                        </div>
-                    </div>
-                    <div class="horiz-banner">
-                        <div class="promo-text">
-                            <p>Next Gen</p>
-                            <h3>Smart Tech</h3>
-                            <a href="javascript:switchView('store')">Shop Now</a>
-                        </div>
-                        <img src="https://images.unsplash.com/photo-1579586337278-3befd40fd17a?auto=format&fit=crop&q=80&w=1000" alt="Smart Watch">
-                    </div>
-                    <div class="square-banner">
-                        <img src="https://placehold.co/200x200/252525/FFFFFF?text=Lenses" alt="Visual Gear">
-                        <div class="promo-text">
-                            <h3 onclick="switchView('store')" style="cursor:pointer">Visual Gears</h3>
-                        </div>
-                    </div>
-                    <div class="square-banner">
-                        <img src="https://placehold.co/200x200/252525/FFFFFF?text=Tablets" alt="Pro Tablets">
-                        <div class="promo-text">
-                            <h3 onclick="switchView('store')" style="cursor:pointer">Productivity</h3>
-                        </div>
-                    </div>
-                    <div class="horiz-banner">
-                        <div class="promo-text">
-                            <p>Ultra Response</p>
-                            <h3>Gaming</h3>
-                            <a href="javascript:switchView('store')">Play Better</a>
-                        </div>
-                        <img src="https://images.unsplash.com/photo-1600080972464-8e5f35802d3e?auto=format&fit=crop&q=80&w=1000" alt="Gamepad">
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Top Products -->
-        <section id="products" class="section-padding">
-            <div class="container">
-                <div class="section-header-flex">
-                    <div class="section-header reveal-up">
-                        <span class="hero-tag">Best Sellers</span>
-                        <h2>High-Performance <span>Store</span></h2>
-                    </div>
-                </div>
-                <div id="product-grid" class="product-grid">
-                    <!-- Products injected by JS -->
-                </div>
-            </div>
-        </section>
 
         <!-- Store Explorer (Advanced Filtering) -->
         <section id="store-explorer-view" class="section-padding hidden">
@@ -314,7 +104,7 @@
                                         <option value="price-high">Price: High to Low</option>
                                     </select>
                                 </div>
-                                <button class="explorer-close" onclick="switchView('home')" title="Close Store Explorer">&times;</button>
+                                <button class="explorer-close" onclick="switchView('')" title="Close Store Explorer">&times;</button>
                             </div>
                         </div>
                         <div id="explorer-grid" class="product-grid">
@@ -325,113 +115,69 @@
             </div>
         </section>
 
-        <!-- New Arrivals (Split Layout) -->
-        <section id="new-arrivals" class="section-padding" style="background-color: #F5F5F7;">
-            <div class="container" style="max-width: 1400px;">
-                <div class="section-header reveal-up" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem; padding-bottom: 1rem;">
-                    <h2 style="font-family: 'Inter', sans-serif; font-weight: 600; font-size: 2.5rem; letter-spacing: -1px; color: #1d1d1f; line-height: 1.2;">Accessories.<br><span style="color: #86868b; font-size: 1.4rem; font-weight: 400;">Essentials that pair perfectly.</span></h2>
-                </div>
-                <div class="arrivals-split">
-                    <div class="arrival-large hidden" style="background: transparent; border: none; box-shadow: none;">
-                        <span style="color: #0066cc; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px;">Summer Collection</span>
-                        <h3 style="font-size: 2.5rem; font-weight: 700; letter-spacing: -1px; margin: 1rem 0; line-height: 1.2; color: #1d1d1f;">Samsung Galaxy<br>Note20 Ultra 5G</h3>
-                        <br><a href="#" style="font-weight: 500; color: #0066cc; text-decoration: none; font-size: 1.1rem;">Buy now ›</a>
-                        <img src="https://placehold.co/600x400/fff/3B82F6?text=Galaxy+Note20" alt="New Arrival" style="width: 100%; object-fit: contain; margin-top: 3rem;">
+        <!-- Auth View -->
+        <section id="auth-view" class="section-padding">
+            <div class="container" style="display: flex; justify-content: center;">
+                <div class="modal-content" style="max-width: 500px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-radius: 20px;">
+                    
+                    <div id="login-form-container">
+                        <img src="https://placehold.co/200x80/white/E31837?text=COCHIN+BAKERS" alt="Cochin Bakers Logo" class="auth-logo" style="margin: 0 auto 20px; display: block;">
+                        <h2 style="text-align: center; margin-bottom: 10px;">Login</h2>
+                        <p class="auth-subtitle" style="text-align: center;">Don't have an account? <span onclick="toggleAuthMode('signup')" style="cursor: pointer; color: #E31837; font-weight: bold;">Create an account</span></p>
+                        
+                        <form id="login-form">
+                            <div class="form-group">
+                                <input type="text" id="login-email" placeholder="Enter email" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="password" id="login-password" placeholder="Enter password" required>
+                            </div>
+                            <span class="forgot-link" style="display: block; text-align: right; margin-bottom: 20px; color: #666; cursor: pointer; font-size: 0.9rem;">Forgot your password?</span>
+                            <button type="submit" class="auth-btn-primary" style="width: 100%;">Login</button>
+                        </form>
+
+                        <div class="auth-divider">OR</div>
+
+                        <button class="auth-btn-google" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_Logo.svg" alt="Google" style="width: 20px;">
+                            Continue with Google
+                        </button>
+
+                        <div class="auth-footer" style="text-align: center; margin-top: 20px; font-size: 0.8rem; color: #999;">
+                            &copy; 2026 CochinBakers. All rights reserved.
+                        </div>
                     </div>
-                    <div class="arrival-list">
-                        <div class="arrival-mini hidden">
-                            <img src="https://placehold.co/100x100/fff/3B82F6?text=Watch" alt="Mini">
-                            <div class="mini-info">
-                                <div class="rating">★★★★★</div>
-                                <h4>Olevs Fashion Waterproof</h4>
-                                <span class="mini-price">₹379.00</span>
+
+                    <div id="signup-form-container" style="display:none">
+                        <img src="https://placehold.co/200x80/white/E31837?text=COCHIN+BAKERS" alt="Cochin Bakers Logo" class="auth-logo" style="margin: 0 auto 20px; display: block;">
+                        <h2 style="text-align: center; margin-bottom: 10px;">Create Account</h2>
+                        <p class="auth-subtitle" style="text-align: center;">Already have an account? <span onclick="toggleAuthMode('login')" style="cursor: pointer; color: #E31837; font-weight: bold;">Login</span></p>
+                        
+                        <form id="signup-form">
+                            <div class="form-group">
+                                <input type="email" id="signup-email" placeholder="Enter email" required>
                             </div>
-                        </div>
-                        <div class="arrival-mini hidden">
-                            <img src="https://placehold.co/100x100/fff/3B82F6?text=Audio" alt="Mini">
-                            <div class="mini-info">
-                                <div class="rating">★★★★★</div>
-                                <h4>Logitech G320 Gaming</h4>
-                                <span class="mini-price">₹399.00</span>
+                            <div class="form-group">
+                                <input type="password" id="signup-password" placeholder="Enter password" required minlength="8">
                             </div>
-                        </div>
-                        <div class="arrival-mini hidden">
-                            <img src="https://placehold.co/100x100/fff/3B82F6?text=Headset" alt="Mini">
-                            <div class="mini-info">
-                                <div class="rating">★★★★★</div>
-                                <h4>Asus TUF Gaming H70</h4>
-                                <span class="mini-price">₹549.00</span>
+                            <button type="submit" class="auth-btn-primary" style="width: 100%;">Create Account</button>
+                        </form>
+                    </div>
+
+                    <div id="verify-form-container" style="display:none">
+                        <h2 style="text-align: center; margin-bottom: 10px;">Verify Account</h2>
+                        <p class="auth-subtitle" style="text-align: center;">Enter the code sent to your email</p>
+                        <form id="verify-form">
+                            <div class="form-group">
+                                <input type="text" id="verify-code" placeholder="123456" required>
                             </div>
-                        </div>
+                            <button type="submit" class="auth-btn-primary" style="width: 100%;">Confirm Code</button>
+                        </form>
+                        <p class="auth-subtitle" style="text-align: center; margin-top: 20px;">Back to <span onclick="toggleAuthMode('login')" style="cursor: pointer; color: #E31837; font-weight: bold;">Login</span></p>
                     </div>
                 </div>
             </div>
         </section>
-    </main>
-
-
-    <!-- Redesigned Auth Modal (Bakery Style) -->
-    <div id="auth-modal">
-        <div class="modal-content">
-            <button class="modal-close-new" onclick="closeAuthModal()">&times;</button>
-            
-            <div id="login-form-container">
-                <img src="https://placehold.co/200x80/white/E31837?text=COCHIN+BAKERS" alt="Cochin Bakers Logo" class="auth-logo">
-                <h2>Login</h2>
-                <p class="auth-subtitle">Don't have an account? <span onclick="toggleAuthMode('signup')">Create an account</span></p>
-                
-                <form id="login-form">
-                    <div class="form-group">
-                        <input type="text" id="login-email" placeholder="Enter email" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="password" id="login-password" placeholder="Enter password" required>
-                    </div>
-                    <span class="forgot-link">Forgot your password?</span>
-                    <button type="submit" class="auth-btn-primary">Login</button>
-                </form>
-
-                <div class="auth-divider">OR</div>
-
-                <button class="auth-btn-google">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_Logo.svg" alt="Google">
-                    Continue with Google
-                </button>
-
-                <div class="auth-footer">
-                    &copy; 2026 CochinBakers. All rights reserved.
-                </div>
-            </div>
-
-            <div id="signup-form-container" style="display:none">
-                <img src="https://placehold.co/200x80/white/E31837?text=COCHIN+BAKERS" alt="Cochin Bakers Logo" class="auth-logo">
-                <h2>Create Account</h2>
-                <p class="auth-subtitle">Already have an account? <span onclick="toggleAuthMode('login')">Login</span></p>
-                
-                <form id="signup-form">
-                    <div class="form-group">
-                        <input type="email" id="signup-email" placeholder="Enter email" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="password" id="signup-password" placeholder="Enter password" required minlength="8">
-                    </div>
-                    <button type="submit" class="auth-btn-primary">Create Account</button>
-                </form>
-            </div>
-
-            <div id="verify-form-container" style="display:none">
-                <h2>Verify Account</h2>
-                <p class="auth-subtitle">Enter the code sent to your email</p>
-                <form id="verify-form">
-                    <div class="form-group">
-                        <input type="text" id="verify-code" placeholder="123456" required>
-                    </div>
-                    <button type="submit" class="auth-btn-primary">Confirm Code</button>
-                </form>
-                <p class="auth-subtitle">Back to <span onclick="toggleAuthMode('login')">Login</span></p>
-            </div>
-        </div>
-    </div>
 
         <!-- User Page / Dashboard Section -->
         <section id="user-page" class="section-padding hidden">
@@ -522,7 +268,7 @@
                         <h4>Shop</h4>
                         <a href="javascript:switchView('store')">Store Explorer</a>
                         <a href="#categories">Featured Categories</a>
-                        <a href="javascript:switchView('home')">New Arrivals</a>
+                        <a href="javascript:switchView('store')">New Arrivals</a>
                     </div>
                     <div class="footer-links">
                         <h4>Account</h4>

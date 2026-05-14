@@ -336,7 +336,8 @@ function updateAuthUI(isLoggedIn) {
         fetchWishlist();
         switchView('user-page');
     } else {
-        userSection.innerHTML = `<button id="login-btn" onclick="openAuthModal()" class="btn secondary">Login</button>`;
+        userSection.innerHTML = `<button id="login-btn" onclick="switchView('auth')" class="btn secondary">Login</button>`;
+        switchView('auth');
     }
 }
 
@@ -454,8 +455,8 @@ window.handleLogout = () => {
 };
 
 // --- Auth UI Interactions ---
-window.openAuthModal = () => document.getElementById('auth-modal').classList.add('active');
-window.closeAuthModal = () => document.getElementById('auth-modal').classList.remove('active');
+window.openAuthModal = () => switchView('auth');
+window.closeAuthModal = () => switchView('store');
 
 window.toggleAuthMode = (mode) => {
     document.getElementById('login-form-container').style.display = mode === 'login' ? 'block' : 'none';
@@ -715,16 +716,14 @@ function updateActiveFilterTags() {
 // --- View Switching ---
 
 window.switchView = (viewName, category = null) => {
-    const mainSectionsIds = ['hero', 'categories', 'products', 'new-arrivals'];
     const explorerSection = document.getElementById('store-explorer-view');
     const userPageSection = document.getElementById('user-page');
-    const heroWrapper = document.querySelector('.dark-hero-wrapper');
-    const featuresWrapper = document.querySelector('.features-wrapper');
+    const authView = document.getElementById('auth-view');
 
     // Hide EVERYTHING by default
-    const allSections = [...mainSectionsIds, 'store-explorer-view', 'user-page', 'features-wrapper', 'dark-hero-wrapper'];
+    const allSections = ['store-explorer-view', 'user-page', 'auth-view'];
     allSections.forEach(id => {
-        const el = document.getElementById(id) || document.querySelector(`.${id}`);
+        const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
     });
 
@@ -742,15 +741,19 @@ window.switchView = (viewName, category = null) => {
         if (userPageSection) userPageSection.classList.remove('hidden');
         updateNavLinks('user-page');
         window.scrollTo(0, 0);
+    } else if (viewName === 'auth') {
+        if (authView) authView.classList.remove('hidden');
+        updateNavLinks('auth');
+        window.scrollTo(0, 0);
     } else {
-        // Show Landing Sections
-        mainSectionsIds.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.classList.remove('hidden');
-        });
-        if (heroWrapper) heroWrapper.classList.remove('hidden');
-        if (featuresWrapper) featuresWrapper.classList.remove('hidden');
-        updateNavLinks('home');
+        if (currentUser) {
+            if (explorerSection) explorerSection.classList.remove('hidden');
+            applyFilters();
+            updateNavLinks('store');
+        } else {
+            if (authView) authView.classList.remove('hidden');
+            updateNavLinks('auth');
+        }
     }
 };
 
