@@ -1008,7 +1008,7 @@ window.generateInvoice = (order) => {
     // Footer
     doc.setFontSize(10);
     doc.setTextColor(150);
-    doc.text("Thank you for shopping with Electra Premium!", 60, finalY + 30);
+    doc.text("Thank you for shopping with COCHIN BAKERS!", 60, finalY + 30);
 
     doc.save(`Invoice_${order.orderId.substring(0, 8)}.pdf`);
 };

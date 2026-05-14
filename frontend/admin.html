@@ -294,9 +294,10 @@
 
         /* Thermal Printer Styles (58mm) */
         @media print {
-            body * { visibility: hidden; }
-            #receipt-print, #receipt-print * { visibility: visible; }
+            body * { display: none !important; }
             #receipt-print {
+                display: block !important;
+                visibility: visible !important;
                 position: absolute;
                 left: 0;
                 top: 0;
@@ -307,12 +308,14 @@
                 color: #000;
                 background: #FFF;
             }
+            #receipt-print * { display: block !important; visibility: visible !important; }
             .receipt-header { text-align: center; margin-bottom: 4mm; border-bottom: 1px dashed #000; padding-bottom: 2mm; }
             .receipt-header h2 { font-size: 14pt; margin-bottom: 1mm; text-transform: uppercase; }
             .receipt-header p { font-size: 8pt; margin: 0; }
-            .receipt-table { width: 100%; border-collapse: collapse; margin-bottom: 4mm; }
-            .receipt-table th { text-align: left; border-bottom: 1px solid #000; font-size: 8pt; padding: 1mm 0; }
-            .receipt-table td { padding: 1mm 0; font-size: 9pt; vertical-align: top; }
+            .receipt-table { display: table !important; width: 100%; border-collapse: collapse; margin-bottom: 4mm; }
+            .receipt-table th { display: table-cell !important; text-align: left; border-bottom: 1px solid #000; font-size: 8pt; padding: 1mm 0; }
+            .receipt-table td { display: table-cell !important; padding: 1mm 0; font-size: 9pt; vertical-align: top; }
+            .receipt-table tr { display: table-row !important; }
             .receipt-total { border-top: 1px dashed #000; padding-top: 2mm; text-align: right; }
             .receipt-footer { text-align: center; margin-top: 6mm; font-size: 8pt; border-top: 1px dashed #000; padding-top: 2mm; }
         }
@@ -369,7 +372,7 @@
 </head>
 <body>
     <aside class="admin-sidebar">
-        <a href="index.html" class="admin-logo">ELECTRO<span>MARTZ</span></a>
+        <a href="index.html" class="admin-logo">COCHIN<span>BAKERS</span></a>
         <span class="sidebar-label">Main Menu</span>
         <button class="sidebar-link active" onclick="switchTab('overview')">📊 Overview</button>
         <button class="sidebar-link" onclick="switchTab('products-tab')">🍰 Quick POS</button>

@@ -1,18 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-    /* Theme - COCHIN BAKERS Premium */
-    --bg-primary: #0A0A0B;
-    --bg-secondary: #141416;
-    --bg-accent: #1C1C1F;
-    --accent-primary: #E31837; /* Warm Red */
-    --accent-secondary: #F97316; /* Orange */
-    --text-primary: #FFFFFF;
-    --text-secondary: #A1A1A6;
-    --text-dim: #6E6E73;
+    /* Theme - COCHIN BAKERS Light & Red */
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F9FAFB;
+    --bg-accent: #F3F4F6;
+    --accent-primary: #E31837; /* Premium Red */
+    --accent-secondary: #BE123C;
+    --text-primary: #111827;
+    --text-secondary: #4B5563;
+    --text-dim: #9CA3AF;
     
-    --glass-bg: rgba(20, 20, 22, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-bg: rgba(255, 255, 255, 0.8);
+    --glass-border: rgba(0, 0, 0, 0.1);
     
     /* Spacing & Sizing */
     --container-max: 1300px;
@@ -1640,10 +1640,10 @@ footer {
 .form-group input, .form-group select, .form-group textarea {
     width: 100%;
     padding: 0.8rem 1rem;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.03);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-sm);
-    color: var(--text-primary);
+    color: #111827;
     font-family: inherit;
     transition: var(--transition-fast);
 }
@@ -2333,7 +2333,7 @@ input[type="range"] {
     display: block;
     width: 25px;
     height: 2px;
-    background: #FFF;
+    background: var(--text-primary);
     transition: 0.3s;
 }
 
