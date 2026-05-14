@@ -625,6 +625,23 @@
         </div>
     </div>
 
+    <div id="edit-category-modal" class="modal">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem">
+                <h2 style="font-family:'Outfit'; font-size:1.5rem">Edit Category</h2>
+                <button class="btn secondary" onclick="closeEditCategoryModal()" style="padding:0.4rem 0.8rem">×</button>
+            </div>
+            <form id="edit-category-form">
+                <input type="hidden" id="edit-c-old-name">
+                <div class="form-group">
+                    <label>Category Name</label>
+                    <input type="text" id="edit-c-new-name" required>
+                </div>
+                <button type="submit" class="btn primary" style="width:100%; margin-top:1rem">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
     <script src="admin.js"></script>
 </body>
 </html>

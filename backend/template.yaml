@@ -266,6 +266,42 @@ Resources:
         - DynamoDBCrudPolicy:
             TableName: !Ref CategoriesTable
 
+  UpdateCategoryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/updateCategory.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /categories/{id}
+            Method: put
+            RestApiId: !Ref EcomApi
+            Auth:
+              Authorizer: NONE # Admin Bypass Enabled
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CategoriesTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ProductsTable
+
+  DeleteCategoryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/deleteCategory.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /categories/{id}
+            Method: delete
+            RestApiId: !Ref EcomApi
+            Auth:
+              Authorizer: NONE # Admin Bypass Enabled
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CategoriesTable
+
 
   CreateOrderFunction:
     Type: AWS::Serverless::Function

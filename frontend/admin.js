@@ -129,9 +129,15 @@ function renderDashboard() {
 
     // Category List Tags
     const catList = document.getElementById('category-list');
-    catList.innerHTML = categories.map(cat => {
-        return `<span class="category-tag">${cat.name}</span>`;
-    }).join('');
+    catList.innerHTML = categories.map(cat => `
+        <div class="category-item-managed" style="display:flex; align-items:center; gap:0.5rem; background:#f9fafb; padding:0.5rem 1rem; border-radius:8px; border:1px solid #eee">
+            <span style="font-weight:600; color:var(--admin-text)">${cat.name}</span>
+            <div style="display:flex; gap:0.5rem; margin-left: auto;">
+                <button onclick="openEditCategoryModal('${cat.name}')" style="background:none; border:none; cursor:pointer; color:var(--admin-accent); font-size:1rem;" title="Edit">✎</button>
+                <button onclick="deleteCategory('${cat.name}')" style="background:none; border:none; cursor:pointer; color:#ef4444; font-size:1.1rem;" title="Delete">🗑</button>
+            </div>
+        </div>
+    `).join('') || '<p style="color:var(--admin-text-muted); font-size:0.9rem;">No categories yet.</p>';
 
     // Orders List
     const ordersList = document.getElementById('orders-list');
@@ -244,6 +250,9 @@ function setupEventListeners() {
 
     // Edit Product
     document.getElementById('edit-product-form')?.addEventListener('submit', handleEditProduct);
+
+    // Edit Category
+    document.getElementById('edit-category-form')?.addEventListener('submit', handleEditCategory);
 }
 
 window.toggleAdminSidebar = () => {
@@ -389,16 +398,89 @@ window.printReceipt = () => {
     const now = new Date();
     receiptDate.innerText = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    // Show the hidden receipt area just for printing
     const printArea = document.getElementById('receipt-print');
     printArea.style.display = 'block';
     
-    window.print();
+    // Use a small delay for mobile browsers to ensure the DOM has updated
+    setTimeout(() => {
+        window.print();
+    }, 250);
+
+    // Clean up after printing
+    window.addEventListener('afterprint', () => {
+        printArea.style.display = 'none';
+        currentBill = [];
+        updateBillUI();
+    }, { once: true });
     
-    // Hide it back and clear the bill
-    printArea.style.display = 'none';
-    currentBill = [];
-    updateBillUI();
+    // Fallback for browsers that don't support afterprint well
+    setTimeout(() => {
+        if (printArea.style.display === 'block') {
+            printArea.style.display = 'none';
+            currentBill = [];
+            updateBillUI();
+        }
+    }, 3000);
+};
+
+window.openEditCategoryModal = (name) => {
+    document.getElementById('edit-c-old-name').value = name;
+    document.getElementById('edit-c-new-name').value = name;
+    document.getElementById('edit-category-modal').classList.add('active');
+};
+
+window.closeEditCategoryModal = () => {
+    document.getElementById('edit-category-modal').classList.remove('active');
+};
+
+window.handleEditCategory = async (e) => {
+    e.preventDefault();
+    const oldName = document.getElementById('edit-c-old-name').value;
+    const newName = document.getElementById('edit-c-new-name').value;
+
+    if (!/^[A-Za-z\s]+$/.test(newName)) {
+        alert("Invalid category name. Only letters and spaces are allowed.");
+        return;
+    }
+
+    const token = await getToken();
+    const res = await fetch(`${AWS_CONFIG.apiUrl}categories/${encodeURIComponent(oldName)}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ newName })
+    });
+
+    if (res.ok) {
+        alert("Category updated and products moved successfully!");
+        closeEditCategoryModal();
+        loadData();
+    } else {
+        const err = await res.json();
+        alert(err.message || "Error updating category");
+    }
+};
+
+window.deleteCategory = async (name) => {
+    if (!confirm(`Are you sure you want to delete the category "${name}"? Products in this category will remain but will be uncategorized.`)) return;
+
+    const token = await getToken();
+    const res = await fetch(`${AWS_CONFIG.apiUrl}categories/${encodeURIComponent(name)}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+
+    if (res.ok) {
+        alert("Category deleted successfully!");
+        loadData();
+    } else {
+        const err = await res.json();
+        alert(err.message || "Error deleting category");
+    }
 };
 
 function renderAllProducts() {
