@@ -107,14 +107,14 @@ function renderDashboard() {
 
     // Category Select in Form
     const catSelect = document.getElementById('p-category');
-    catSelect.innerHTML = '<option value="">Select Category</option>' + 
+    catSelect.innerHTML = '<option value="">Select Category</option>' +
         categories.map(cat => `<option value="${cat.name}">${cat.name}</option>`).join('');
 
     // --- NEW: Products Tab Logic ---
     // 1. Populate Filter Bar
     const filterBar = document.getElementById('product-filter-bar');
     if (filterBar) {
-        filterBar.innerHTML = '<button class="filter-btn active" onclick="filterProducts(\'All\')">All Items</button>' + 
+        filterBar.innerHTML = '<button class="filter-btn active" onclick="filterProducts(\'All\')">All Items</button>' +
             categories.map(cat => `<button class="filter-btn" onclick="filterProducts('${cat.name}')">${cat.name}</button>`).join('');
     }
 
@@ -164,7 +164,7 @@ function setupEventListeners() {
         const name = document.getElementById('p-name').value;
         const category = document.getElementById('p-category').value;
         const price = parseFloat(document.getElementById('p-price').value);
-        
+
         // Validation
         if (price <= 0 || price > 1500) {
             alert("Price must be between 1 and 1500.");
@@ -172,18 +172,18 @@ function setupEventListeners() {
         }
 
         // Duplicate Check (Name and Price)
-        const isDuplicate = products.some(p => 
-            p.name.trim().toLowerCase() === name.trim().toLowerCase() && 
+        const isDuplicate = products.some(p =>
+            p.name.trim().toLowerCase() === name.trim().toLowerCase() &&
             parseFloat(p.price) === price
         );
-        
+
         if (isDuplicate) {
             alert(`A product named "${name}" with price ₹${price} already exists. Please use a different name or price.`);
             return;
         }
 
         const image = await getImageData(null, 'p-image-file');
-        
+
         if (!image) {
             alert("Please provide a product image URL or upload a file.");
             return;
@@ -201,7 +201,7 @@ function setupEventListeners() {
         const token = await getToken();
         const res = await fetch(`${AWS_CONFIG.apiUrl}products`, {
             method: 'POST',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
@@ -244,7 +244,7 @@ function setupEventListeners() {
                         canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
-                        
+
                         // Convert to compressed JPEG
                         const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
                         resolve(dataUrl);
@@ -273,7 +273,7 @@ function setupEventListeners() {
         const token = await getToken();
         const res = await fetch(`${AWS_CONFIG.apiUrl}categories`, {
             method: 'POST',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
@@ -287,7 +287,8 @@ function setupEventListeners() {
         } else {
             const err = await res.json();
             alert(err.message || "Error creating category");
-        }    });
+        }
+    });
 
     // Edit Product
     document.getElementById('edit-product-form')?.addEventListener('submit', handleEditProduct);
@@ -365,7 +366,7 @@ function renderProductGrid(category) {
     if (!grid) return;
 
     const filtered = category === 'All' ? products : products.filter(p => p.category === category);
-    
+
     grid.innerHTML = filtered.map(p => `
         <div class="product-card-premium" onclick="addToBill('${p.id}')">
             <img src="${p.image}" onerror="this.src='https://placehold.co/400x400?text=${p.name}'">
@@ -502,7 +503,7 @@ window.printReceipt = async () => {
 
     const printArea = document.getElementById('receipt-print');
     printArea.style.display = 'block';
-    
+
     // Save order to DB
     savePOSOrder(itemsForDB, total);
 
@@ -515,7 +516,7 @@ window.printReceipt = async () => {
     window.addEventListener('afterprint', () => {
         printArea.style.display = 'none';
         currentBill = [];
-        
+
         // Reset Paid checkbox and button
         const paidBox = document.getElementById('paid-checkbox');
         const checkoutBtn = document.getElementById('checkout-btn');
@@ -528,7 +529,7 @@ window.printReceipt = async () => {
 
         updateBillUI();
     }, { once: true });
-    
+
     // Fallback for browsers that don't support afterprint well
     setTimeout(() => {
         if (printArea.style.display === 'block') {
@@ -657,10 +658,10 @@ window.openEditModal = (productId) => {
     document.getElementById('edit-p-id').value = product.id;
     document.getElementById('edit-p-name').value = product.name;
     document.getElementById('edit-p-price').value = product.price;
-    
+
     const catSelect = document.getElementById('edit-p-category');
     catSelect.innerHTML = categories.map(cat => `<option value="${cat.name}" ${cat.name === product.category ? 'selected' : ''}>${cat.name}</option>`).join('');
-    
+
     document.getElementById('edit-modal').style.display = 'flex';
 };
 
@@ -747,7 +748,7 @@ window.renderSalesReport = () => {
     const selectedMonth = document.getElementById('report-month').value;
 
     const ordersArray = Array.isArray(orders) ? orders : [];
-    
+
     // Filter orders
     let filteredOrders = ordersArray;
     if (selectedDate) {
