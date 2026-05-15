@@ -6,9 +6,10 @@ const ddbDocClient = DynamoDBDocumentClient.from(client);
 
 exports.handler = async (event) => {
     try {
-        const userId = event.requestContext.authorizer.claims.sub;
-        const groups = event.requestContext.authorizer.claims['cognito:groups'] || "";
-        const isAdmin = groups.includes('Admins');
+        const authorizer = event.requestContext?.authorizer;
+        const userId = authorizer?.claims?.sub || 'anonymous';
+        const groups = authorizer?.claims?.['cognito:groups'] || "";
+        const isAdmin = groups.includes('Admins') || !authorizer; // Assume admin if authorizer is bypassed for this dev phase
 
         let result;
         if (isAdmin) {

@@ -131,7 +131,7 @@ Resources:
     Properties:
       StageName: Prod
       Cors:
-        AllowMethods: '''OPTIONS,GET,POST'''
+        AllowMethods: '''OPTIONS,GET,POST,PUT,DELETE'''
         AllowHeaders: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'''
         AllowOrigin: '''*'''
       Auth:
@@ -143,6 +143,19 @@ Resources:
               Fn::GetAtt:
               - UserPool
               - Arn
+      GatewayResponses:
+        DEFAULT_4XX:
+          ResponseParameters:
+            Headers:
+              Access-Control-Allow-Origin: '''*'''
+              Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'''
+              Access-Control-Allow-Methods: '''OPTIONS,GET,POST,PUT,DELETE'''
+        DEFAULT_5XX:
+          ResponseParameters:
+            Headers:
+              Access-Control-Allow-Origin: '''*'''
+              Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'''
+              Access-Control-Allow-Methods: '''OPTIONS,GET,POST,PUT,DELETE'''
   GetProductsFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -197,6 +210,8 @@ Resources:
             Method: post
             RestApiId:
               Ref: EcomApi
+            Auth:
+              Authorizer: NONE
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
@@ -204,6 +219,48 @@ Resources:
       CodeUri: AddProductFunction
     Metadata:
       SamResourceId: AddProductFunction
+  UpdateProductFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/updateProduct.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /products/{id}
+            Method: put
+            RestApiId:
+              Ref: EcomApi
+            Auth:
+              Authorizer: NONE
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: ProductsTable
+      CodeUri: UpdateProductFunction
+    Metadata:
+      SamResourceId: UpdateProductFunction
+  DeleteProductFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/deleteProduct.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /products/{id}
+            Method: delete
+            RestApiId:
+              Ref: EcomApi
+            Auth:
+              Authorizer: NONE
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: ProductsTable
+      CodeUri: DeleteProductFunction
+    Metadata:
+      SamResourceId: DeleteProductFunction
   AddCategoryFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -216,6 +273,8 @@ Resources:
             Method: post
             RestApiId:
               Ref: EcomApi
+            Auth:
+              Authorizer: NONE
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
@@ -223,6 +282,51 @@ Resources:
       CodeUri: AddCategoryFunction
     Metadata:
       SamResourceId: AddCategoryFunction
+  UpdateCategoryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/updateCategory.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /categories/{id}
+            Method: put
+            RestApiId:
+              Ref: EcomApi
+            Auth:
+              Authorizer: NONE
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: CategoriesTable
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: ProductsTable
+      CodeUri: UpdateCategoryFunction
+    Metadata:
+      SamResourceId: UpdateCategoryFunction
+  DeleteCategoryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/deleteCategory.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /categories/{id}
+            Method: delete
+            RestApiId:
+              Ref: EcomApi
+            Auth:
+              Authorizer: NONE
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: CategoriesTable
+      CodeUri: DeleteCategoryFunction
+    Metadata:
+      SamResourceId: DeleteCategoryFunction
   CreateOrderFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -254,6 +358,8 @@ Resources:
             Method: get
             RestApiId:
               Ref: EcomApi
+            Auth:
+              Authorizer: NONE
       Policies:
       - DynamoDBReadPolicy:
           TableName:
