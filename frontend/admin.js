@@ -74,7 +74,7 @@ async function loadData() {
             fetch(`${AWS_CONFIG.apiUrl}orders`, { headers })
         ]);
 
-        products = await prodRes.json();
+        products = (await prodRes.json()).sort((a, b) => a.name.localeCompare(b.name));
         categories = await catRes.json();
         orders = await ordRes.json();
 
@@ -163,8 +163,8 @@ function setupEventListeners() {
         const price = parseFloat(document.getElementById('p-price').value);
         
         // Validation
-        if (price <= 0 || price > 1000) {
-            alert("Price must be between 1 and 1000.");
+        if (price <= 0 || price > 1500) {
+            alert("Price must be between 1 and 1500.");
             return;
         }
 
@@ -335,7 +335,7 @@ function renderProductGrid(category) {
 
     const filtered = category === 'All' ? products : products.filter(p => p.category === category);
     
-    grid.innerHTML = filtered.slice().reverse().map(p => `
+    grid.innerHTML = filtered.map(p => `
         <div class="product-card-premium" onclick="addToBill('${p.id}')">
             <img src="${p.image}" onerror="this.src='https://placehold.co/400x400?text=${p.name}'">
             <div class="product-card-overlay">
@@ -378,11 +378,18 @@ function updateBillUI() {
             <div class="bill-item">
                 <div class="info">
                     <h5>${item.name}</h5>
-                    <p>₹${item.price} x ${item.qty}</p>
+                    <div style="display:flex; align-items:center; gap:0.6rem; margin-top:0.3rem">
+                        <div style="display:flex; align-items:center; background:#f3f4f6; border-radius:6px; overflow:hidden; border:1px solid #e5e7eb">
+                            <button onclick="decrementQty(${index})" style="border:none; background:none; padding:4px 10px; cursor:pointer; font-weight:bold; color:var(--admin-accent); transition:0.2s" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">-</button>
+                            <span style="font-size:0.85rem; font-weight:700; min-width:24px; text-align:center; background:#fff; padding:4px 0">${item.qty}</span>
+                            <button onclick="incrementQty(${index})" style="border:none; background:none; padding:4px 10px; cursor:pointer; font-weight:bold; color:var(--admin-accent); transition:0.2s" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">+</button>
+                        </div>
+                        <p style="font-size:0.75rem; color:#6B7280; font-weight:500">@ ₹${item.price}</p>
+                    </div>
                 </div>
-                <div style="display:flex; align-items:center; gap:0.5rem">
-                    <strong>₹${itemTotal}</strong>
-                    <button class="btn secondary" style="padding: 0.2rem 0.5rem; background: #FEF2F2; color: #E31837;" onclick="removeFromBill(${index})">×</button>
+                <div style="display:flex; align-items:center; gap:0.8rem">
+                    <strong style="font-size:0.95rem; color:var(--admin-text-main)">₹${itemTotal}</strong>
+                    <button class="btn secondary" style="padding: 0.3rem 0.6rem; background: #FEF2F2; color: #E31837; border-radius:8px" onclick="removeFromBill(${index})" title="Remove item">×</button>
                 </div>
             </div>
         `;
@@ -390,6 +397,21 @@ function updateBillUI() {
 
     totalEl.innerText = `₹${total}`;
 }
+
+window.incrementQty = (index) => {
+    currentBill[index].qty += 1;
+    updateBillUI();
+};
+
+window.decrementQty = (index) => {
+    if (currentBill[index].qty > 1) {
+        currentBill[index].qty -= 1;
+    } else {
+        currentBill.splice(index, 1);
+    }
+    updateBillUI();
+};
+
 
 window.removeFromBill = (index) => {
     currentBill.splice(index, 1);
@@ -514,7 +536,7 @@ function renderAllProducts() {
     const tableBody = document.getElementById('all-products-list');
     if (!tableBody) return;
 
-    tableBody.innerHTML = products.slice().reverse().map(p => `
+    tableBody.innerHTML = products.map(p => `
         <tr>
             <td>
                 <div style="display:flex; align-items:center; gap:1rem">
