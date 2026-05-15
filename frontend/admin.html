@@ -388,6 +388,7 @@
         <button class="sidebar-link" onclick="switchTab('all-products-tab')">📦 All Products</button>
         <button class="sidebar-link" onclick="switchTab('categories-tab')">📁 Categories</button>
         <button class="sidebar-link" onclick="switchTab('orders-tab')">🧾 Orders</button>
+        <button class="sidebar-link" onclick="switchTab('sales-report-tab')">📊 Sales Report</button>
         <span class="sidebar-label">Account</span>
         <button class="sidebar-link" onclick="handleLogout()">🚪 Logout</button>
         <div class="sidebar-footer">
@@ -570,6 +571,57 @@
                         </tr>
                     </thead>
                     <tbody id="all-products-list">
+                        <!-- Data injected by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="sales-report-tab" class="tab-content">
+            <div class="dashboard-header">
+                <div>
+                    <h1>Sales Report</h1>
+                    <p>Analyze your store's performance.</p>
+                </div>
+            </div>
+            
+            <div class="admin-form-card" style="max-width: 100%; margin-bottom: 2rem;">
+                <div style="display: flex; gap: 2rem; align-items: flex-end; flex-wrap: wrap;">
+                    <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 200px;">
+                        <label>Filter by Date</label>
+                        <input type="date" id="report-date" onchange="renderSalesReport()">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 200px;">
+                        <label>Filter by Month</label>
+                        <input type="month" id="report-month" onchange="renderSalesReport()">
+                    </div>
+                    <button class="btn secondary" onclick="clearReportFilters()">Clear Filters</button>
+                </div>
+            </div>
+
+            <div class="stat-grid" style="margin-bottom: 2rem;">
+                <div class="stat-card">
+                    <h4>Report Total</h4>
+                    <span class="value" id="report-grand-total">₹0</span>
+                </div>
+                <div class="stat-card">
+                    <h4>Orders Count</h4>
+                    <span class="value" id="report-order-count">0</span>
+                </div>
+            </div>
+
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Sl No</th>
+                            <th>Item Name</th>
+                            <th>Unit Price</th>
+                            <th>Qty Sold</th>
+                            <th>Total Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sales-report-table">
                         <!-- Data injected by JS -->
                     </tbody>
                 </table>

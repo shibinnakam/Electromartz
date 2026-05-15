@@ -168,6 +168,17 @@ function setupEventListeners() {
             return;
         }
 
+        // Duplicate Check (Name and Price)
+        const isDuplicate = products.some(p => 
+            p.name.trim().toLowerCase() === name.trim().toLowerCase() && 
+            parseFloat(p.price) === price
+        );
+        
+        if (isDuplicate) {
+            alert(`A product named "${name}" with price ₹${price} already exists. Please use a different name or price.`);
+            return;
+        }
+
         const image = await getImageData(null, 'p-image-file');
         
         if (!image) {
@@ -304,6 +315,10 @@ window.switchTab = (tabId) => {
     }
     if (tabId === 'categories-tab') links[3].classList.add('active');
     if (tabId === 'orders-tab') links[4].classList.add('active');
+    if (tabId === 'sales-report-tab') {
+        links[5].classList.add('active');
+        renderSalesReport();
+    }
 };
 
 window.handleLogout = () => {
@@ -675,4 +690,66 @@ window.deleteProduct = async (productId) => {
         console.error(err);
         alert("Error deleting product.");
     }
+};
+
+window.clearReportFilters = () => {
+    document.getElementById('report-date').value = '';
+    document.getElementById('report-month').value = '';
+    renderSalesReport();
+};
+
+window.renderSalesReport = () => {
+    const tableBody = document.getElementById('sales-report-table');
+    const grandTotalEl = document.getElementById('report-grand-total');
+    const orderCountEl = document.getElementById('report-order-count');
+    if (!tableBody) return;
+
+    const selectedDate = document.getElementById('report-date').value;
+    const selectedMonth = document.getElementById('report-month').value;
+
+    const ordersArray = Array.isArray(orders) ? orders : [];
+    
+    // Filter orders
+    let filteredOrders = ordersArray;
+    if (selectedDate) {
+        filteredOrders = filteredOrders.filter(o => o.createdAt.startsWith(selectedDate));
+    } else if (selectedMonth) {
+        filteredOrders = filteredOrders.filter(o => o.createdAt.startsWith(selectedMonth));
+    }
+
+    // Aggregate by item name
+    const itemMap = {};
+    let grandTotal = 0;
+
+    filteredOrders.forEach(order => {
+        grandTotal += order.totalAmount || 0;
+        (order.items || []).forEach(item => {
+            const key = item.name;
+            if (!itemMap[key]) {
+                itemMap[key] = {
+                    name: item.name,
+                    price: item.price,
+                    qty: 0,
+                    total: 0
+                };
+            }
+            itemMap[key].qty += (item.qty || 1);
+            itemMap[key].total += (item.price * (item.qty || 1));
+        });
+    });
+
+    const reportItems = Object.values(itemMap).sort((a, b) => b.total - a.total);
+
+    tableBody.innerHTML = reportItems.map((item, index) => `
+        <tr>
+            <td>${index + 1}</td>
+            <td>${item.name}</td>
+            <td>₹${item.price}</td>
+            <td>${item.qty}</td>
+            <td><strong>₹${item.total}</strong></td>
+        </tr>
+    `).join('') || '<tr><td colspan="5" style="text-align:center; padding:2rem; color:#999">No sales found for the selected period.</td></tr>';
+
+    grandTotalEl.innerText = `₹${grandTotal}`;
+    orderCountEl.innerText = filteredOrders.length;
 };

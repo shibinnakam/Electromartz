@@ -44,7 +44,8 @@ exports.handler = async (event) => {
             totalAmount,
             shippingDetails,
             status: "Ordered", 
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            ttl: Math.floor(Date.now() / 1000) + (60 * 24 * 60 * 60) // Expire in 60 days
         };
 
         console.log("Saving order to DynamoDB...");
