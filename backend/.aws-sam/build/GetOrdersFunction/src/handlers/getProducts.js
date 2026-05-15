@@ -6,9 +6,19 @@ const ddbDocClient = DynamoDBDocumentClient.from(client);
 
 exports.handler = async (event) => {
     try {
-        const { Items } = await ddbDocClient.send(new ScanCommand({
-            TableName: process.env.PRODUCTS_TABLE
-        }));
+        let items = [];
+        let lastEvaluatedKey = null;
+
+        do {
+            const params = {
+                TableName: process.env.PRODUCTS_TABLE,
+                ExclusiveStartKey: lastEvaluatedKey || undefined
+            };
+
+            const response = await ddbDocClient.send(new ScanCommand(params));
+            items = items.concat(response.Items || []);
+            lastEvaluatedKey = response.LastEvaluatedKey;
+        } while (lastEvaluatedKey);
 
         return {
             statusCode: 200,
@@ -18,7 +28,7 @@ exports.handler = async (event) => {
                 "Access-Control-Allow-Methods": "OPTIONS,GET,POST",
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(Items)
+            body: JSON.stringify(items)
         };
     } catch (err) {
         console.error(err);

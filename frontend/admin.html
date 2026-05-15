@@ -294,21 +294,30 @@
 
         /* Thermal Printer Styles (58mm) */
         @media print {
-            body * { display: none !important; }
+            @page { margin: 0; size: auto; }
+            html, body { 
+                background: white !important; 
+                margin: 0 !important; 
+                padding: 0 !important; 
+                height: auto !important; 
+                overflow: visible !important;
+            }
+            aside, main, .modal, .admin-toggle-btn { display: none !important; }
             #receipt-print {
                 display: block !important;
                 visibility: visible !important;
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 58mm;
-                padding: 2mm;
+                width: 58mm !important;
+                padding: 4mm 2mm !important;
+                margin: 0 !important;
                 font-family: 'Courier New', Courier, monospace;
                 font-size: 10pt;
                 color: #000;
                 background: #FFF;
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
             }
-            #receipt-print * { display: block !important; visibility: visible !important; }
+            #receipt-print * { visibility: visible !important; }
             .receipt-header { text-align: center; margin-bottom: 4mm; border-bottom: 1px dashed #000; padding-bottom: 2mm; }
             .receipt-header h2 { font-size: 14pt; margin-bottom: 1mm; text-transform: uppercase; }
             .receipt-header p { font-size: 8pt; margin: 0; }
@@ -496,37 +505,6 @@
             </div>
         </div>
 
-        <!-- Hidden Receipt for Printing -->
-        <div id="receipt-print" style="display: none;">
-            <div class="receipt-header">
-                <h2>COCHIN BAKERS</h2>
-                <p>Ph: +91 2345678909</p>
-                <p>Email: snajdsnd@gmail.com</p>
-                <p>FSSAI: rjfnjfnj | GST: dnejfnejfne</p>
-                <p id="receipt-date" style="margin-top: 2mm; font-weight: bold;"></p>
-            </div>
-            <table class="receipt-table">
-                <thead>
-                    <tr>
-                        <th style="width: 8%">#</th>
-                        <th style="width: 40%">Item</th>
-                        <th style="width: 12%">Qty</th>
-                        <th style="width: 18%; text-align: right;">Rate</th>
-                        <th style="width: 22%; text-align: right;">Total</th>
-                    </tr>
-                </thead>
-                <tbody id="receipt-items"></tbody>
-            </table>
-            <div class="receipt-total">
-                <p><strong>Grand Total: ₹<span id="receipt-total-val"></span></strong></p>
-                <p>Status: PAID</p>
-            </div>
-            <div class="receipt-footer">
-                <p>Thank you for visiting COCHIN BAKERS!</p>
-                <p>Visit again soon!</p>
-            </div>
-        </div>
-
         <div id="categories-tab" class="tab-content">
             <div class="dashboard-header">
                 <div>
@@ -543,8 +521,6 @@
                     </div>
                     <button type="submit" class="btn primary" style="width:100%">Create Category</button>
                 </form>
-
-
 
                 <h3 class="section-title">Existing Categories</h3>
                 <div id="category-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem">
@@ -575,6 +551,7 @@
                 </tbody>
             </table>
         </div>
+
         <div id="all-products-tab" class="tab-content">
             <div class="dashboard-header">
                 <div>
@@ -599,6 +576,37 @@
             </div>
         </div>
     </main>
+
+    <!-- Hidden Receipt for Printing -->
+    <div id="receipt-print" style="display: none;">
+        <div class="receipt-header">
+            <h2>COCHIN BAKERS</h2>
+            <p>Ph: +91 2345678909</p>
+            <p>Email: snajdsnd@gmail.com</p>
+            <p>FSSAI: rjfnjfnj | GST: dnejfnejfne</p>
+            <p id="receipt-date" style="margin-top: 2mm; font-weight: bold;"></p>
+        </div>
+        <table class="receipt-table">
+            <thead>
+                <tr>
+                    <th style="width: 8%">#</th>
+                    <th style="width: 40%">Item</th>
+                    <th style="width: 12%">Qty</th>
+                    <th style="width: 18%; text-align: right;">Rate</th>
+                    <th style="width: 22%; text-align: right;">Total</th>
+                </tr>
+            </thead>
+            <tbody id="receipt-items"></tbody>
+        </table>
+        <div class="receipt-total">
+            <p><strong>Grand Total: ₹<span id="receipt-total-val"></span></strong></p>
+            <p>Status: PAID</p>
+        </div>
+        <div class="receipt-footer">
+            <p>Thank you for visiting COCHIN BAKERS!</p>
+            <p>Visit again soon!</p>
+        </div>
+    </div>
 
     <div id="edit-modal" class="modal">
         <div class="modal-content">
