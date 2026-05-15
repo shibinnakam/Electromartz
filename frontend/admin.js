@@ -418,7 +418,7 @@ window.removeFromBill = (index) => {
     updateBillUI();
 };
 
-window.printReceipt = () => {
+window.printReceipt = async () => {
     if (currentBill.length === 0) {
         alert("Please add items to the bill first!");
         return;
@@ -429,9 +429,19 @@ window.printReceipt = () => {
     const receiptDate = document.getElementById('receipt-date');
 
     let total = 0;
-    receiptItems.innerHTML = currentBill.map((item, i) => {
+    const itemsForDB = currentBill.map((item, i) => {
         const itemTotal = item.price * item.qty;
         total += itemTotal;
+        return {
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            qty: item.qty
+        };
+    });
+
+    receiptItems.innerHTML = currentBill.map((item, i) => {
+        const itemTotal = item.price * item.qty;
         return `
             <tr>
                 <td>${i + 1}</td>
@@ -450,6 +460,9 @@ window.printReceipt = () => {
     const printArea = document.getElementById('receipt-print');
     printArea.style.display = 'block';
     
+    // Save order to DB
+    savePOSOrder(itemsForDB, total);
+
     // Use a small delay for mobile browsers to ensure the DOM has updated
     setTimeout(() => {
         window.print();
@@ -471,6 +484,35 @@ window.printReceipt = () => {
         }
     }, 3000);
 };
+
+async function savePOSOrder(items, total) {
+    try {
+        const token = await getToken();
+        const orderData = {
+            items,
+            totalAmount: total,
+            shippingDetails: { method: 'POS', address: 'Counter' },
+            status: 'Paid'
+        };
+
+        const res = await fetch(`${AWS_CONFIG.apiUrl}orders`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(orderData)
+        });
+
+        if (res.ok) {
+            console.log("POS Order saved successfully");
+            // Refresh data to show in orders tab
+            loadData();
+        }
+    } catch (err) {
+        console.error("Error saving POS order", err);
+    }
+}
 
 window.openEditCategoryModal = (name) => {
     document.getElementById('edit-c-old-name').value = name;
