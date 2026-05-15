@@ -149,8 +149,11 @@ function renderDashboard() {
             <td>₹${o.totalAmount}</td>
             <td><span class="admin-badge" style="background:${o.status === 'Pending' ? '#ffaa00' : '#07c160'}">${o.status}</span></td>
             <td>${new Date(o.createdAt).toLocaleDateString()}</td>
+            <td>
+                <button class="action-btn btn-edit" style="background:#F3F4F6; color:#111827" onclick="viewOrderItems('${o.orderId}')">View Items</button>
+            </td>
         </tr>
-    `).join('') || '<tr><td colspan="5">No orders yet.</td></tr>';
+    `).join('') || '<tr><td colspan="6">No orders yet.</td></tr>';
 }
 
 function setupEventListeners() {
@@ -291,6 +294,19 @@ function setupEventListeners() {
 
     // Edit Category
     document.getElementById('edit-category-form')?.addEventListener('submit', handleEditCategory);
+    // Paid Checkbox logic
+    document.getElementById('paid-checkbox')?.addEventListener('change', (e) => {
+        const btn = document.getElementById('checkout-btn');
+        if (e.target.checked) {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+        } else {
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            btn.style.cursor = 'not-allowed';
+        }
+    });
 }
 
 window.toggleAdminSidebar = () => {
@@ -411,6 +427,18 @@ function updateBillUI() {
     }).join('');
 
     totalEl.innerText = `₹${total}`;
+
+    // Reset Paid checkbox and button state if bill is empty
+    if (currentBill.length === 0) {
+        const paidBox = document.getElementById('paid-checkbox');
+        const checkoutBtn = document.getElementById('checkout-btn');
+        if (paidBox) paidBox.checked = false;
+        if (checkoutBtn) {
+            checkoutBtn.disabled = true;
+            checkoutBtn.style.opacity = '0.5';
+            checkoutBtn.style.cursor = 'not-allowed';
+        }
+    }
 }
 
 window.incrementQty = (index) => {
@@ -487,6 +515,17 @@ window.printReceipt = async () => {
     window.addEventListener('afterprint', () => {
         printArea.style.display = 'none';
         currentBill = [];
+        
+        // Reset Paid checkbox and button
+        const paidBox = document.getElementById('paid-checkbox');
+        const checkoutBtn = document.getElementById('checkout-btn');
+        if (paidBox) paidBox.checked = false;
+        if (checkoutBtn) {
+            checkoutBtn.disabled = true;
+            checkoutBtn.style.opacity = '0.5';
+            checkoutBtn.style.cursor = 'not-allowed';
+        }
+
         updateBillUI();
     }, { once: true });
     
@@ -752,4 +791,39 @@ window.renderSalesReport = () => {
 
     grandTotalEl.innerText = `₹${grandTotal}`;
     orderCountEl.innerText = filteredOrders.length;
+};
+
+window.viewOrderItems = (orderId) => {
+    const order = orders.find(o => o.orderId === orderId);
+    if (!order || !order.items) return;
+
+    const container = document.getElementById('order-items-list-container');
+    container.innerHTML = `
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${order.items.map(item => `
+                    <tr>
+                        <td>${item.name}</td>
+                        <td>${item.qty}</td>
+                        <td>₹${item.price}</td>
+                        <td>₹${item.price * item.qty}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+
+    document.getElementById('order-items-modal').style.display = 'flex';
+};
+
+window.closeOrderItemsModal = () => {
+    document.getElementById('order-items-modal').style.display = 'none';
 };
