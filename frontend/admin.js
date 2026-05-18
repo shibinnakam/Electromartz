@@ -352,7 +352,16 @@ window.toggleAddProductForm = () => {
     container.style.display = container.style.display === 'none' ? 'block' : 'none';
 };
 
+window.currentPOSCategory = 'All';
+window.currentPOSSearch = '';
+
+window.searchPOSProducts = () => {
+    window.currentPOSSearch = document.getElementById('pos-search').value.toLowerCase();
+    renderProductGrid(window.currentPOSCategory);
+};
+
 window.filterProducts = (category) => {
+    window.currentPOSCategory = category;
     // Update active button
     document.querySelectorAll('.filter-btn').forEach(btn => {
         const isMatch = btn.innerText === category || (category === 'All' && btn.innerText === 'All Items');
@@ -365,7 +374,11 @@ function renderProductGrid(category) {
     const grid = document.getElementById('admin-product-grid');
     if (!grid) return;
 
-    const filtered = category === 'All' ? products : products.filter(p => p.category === category);
+    let filtered = category === 'All' ? products : products.filter(p => p.category === category);
+    
+    if (window.currentPOSSearch) {
+        filtered = filtered.filter(p => p.name.toLowerCase().includes(window.currentPOSSearch));
+    }
 
     grid.innerHTML = filtered.map(p => `
         <div class="product-card-premium" onclick="addToBill('${p.id}')">
@@ -375,7 +388,7 @@ function renderProductGrid(category) {
                 <div class="price">₹${p.price}</div>
             </div>
         </div>
-    `).join('') || '<p style="grid-column: 1/-1; text-align: center; padding: 4rem; color: #999; font-weight: 500;">No products found in this category.</p>';
+    `).join('') || '<p style="grid-column: 1/-1; text-align: center; padding: 4rem; color: #999; font-weight: 500;">No products found.</p>';
 }
 
 // --- Quick Bill Logic ---
@@ -629,11 +642,22 @@ window.deleteCategory = async (name) => {
     }
 };
 
-function renderAllProducts() {
+window.searchInventoryProducts = () => {
+    const query = document.getElementById('inventory-search').value.toLowerCase();
+    renderAllProducts(query);
+};
+
+function renderAllProducts(searchQuery = '') {
     const tableBody = document.getElementById('all-products-list');
     if (!tableBody) return;
 
-    tableBody.innerHTML = products.map(p => `
+    let filtered = products;
+    if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        filtered = filtered.filter(p => p.name.toLowerCase().includes(query));
+    }
+
+    tableBody.innerHTML = filtered.map(p => `
         <tr>
             <td>
                 <div style="display:flex; align-items:center; gap:1rem">

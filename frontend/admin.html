@@ -480,6 +480,11 @@
 
             <div class="pos-container">
                 <div class="products-section">
+                    <!-- Search Bar -->
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <input type="text" id="pos-search" placeholder="Search products by name..." oninput="searchPOSProducts()" style="border-radius: 100px; padding: 0.8rem 1.5rem; background: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    </div>
+
                     <!-- Category Filter -->
                     <div class="filter-bar" id="product-filter-bar">
                         <button class="filter-btn active" onclick="filterProducts('All')">All Items</button>
@@ -567,6 +572,10 @@
                     <h1>Product Inventory</h1>
                     <p>Edit or remove products from your store.</p>
                 </div>
+            </div>
+            <!-- Search Bar -->
+            <div class="form-group" style="margin-bottom: 1.5rem; max-width: 400px;">
+                <input type="text" id="inventory-search" placeholder="Search inventory by name..." oninput="searchInventoryProducts()" style="border-radius: 10px; background: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
             </div>
             <div class="admin-table-container">
                 <table class="admin-table">
