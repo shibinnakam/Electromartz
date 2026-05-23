@@ -314,6 +314,8 @@ Resources:
             Path: /orders
             Method: post
             RestApiId: !Ref EcomApi
+            Auth:
+              Authorizer: NONE # Admin Bypass Enabled
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref OrdersTable

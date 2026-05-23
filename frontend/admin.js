@@ -310,6 +310,20 @@ function setupEventListeners() {
     });
 }
 
+window.connectUSBPrinter = async () => {
+    const btn = document.getElementById('connect-printer-btn');
+    const connected = await window.usbPrinter.connect();
+    if (connected) {
+        btn.innerText = "✅ Printer Online";
+        btn.classList.add('success');
+        btn.style.background = "#10B981";
+        btn.style.color = "#fff";
+    } else {
+        alert("Failed to connect printer. Make sure it is plugged in and you select it in the popup.");
+    }
+};
+
+
 window.toggleAdminSidebar = () => {
     document.querySelector('.admin-sidebar').classList.toggle('active');
 };
@@ -514,8 +528,44 @@ window.printReceipt = async () => {
     const now = new Date();
     receiptDate.innerText = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    const printArea = document.getElementById('receipt-print');
     printArea.style.display = 'block';
+
+    // USB Direct Print Integration
+    const printerHeaderInfo = {
+        address: "Nedumkandam, Padinjarekavala",
+        phone: "8848782373"
+    };
+
+    if (window.usbPrinter && window.usbPrinter.device) {
+        try {
+            await window.usbPrinter.printReceipt({ items: itemsForDB, total: total }, printerHeaderInfo);
+            // If USB print is successful, we don't necessarily need window.print()
+            // but we might still want to call it for record/preview or just skip it.
+            // Let's skip window.print() if USB is connected to avoid double printing.
+            console.log("Printed via WebUSB");
+            
+            // Still need to trigger the cleanup logic (normally in afterprint)
+            setTimeout(() => {
+                printArea.style.display = 'none';
+                currentBill = [];
+                const paidBox = document.getElementById('paid-checkbox');
+                const checkoutBtn = document.getElementById('checkout-btn');
+                if (paidBox) paidBox.checked = false;
+                if (checkoutBtn) {
+                    checkoutBtn.disabled = true;
+                    checkoutBtn.style.opacity = '0.5';
+                    checkoutBtn.style.cursor = 'not-allowed';
+                }
+                updateBillUI();
+            }, 1000);
+
+            // Save order to DB
+            savePOSOrder(itemsForDB, total);
+            return; // Exit function so window.print() is not called
+        } catch (e) {
+            console.error("USB Print failed, falling back to browser print", e);
+        }
+    }
 
     // Save order to DB
     savePOSOrder(itemsForDB, total);

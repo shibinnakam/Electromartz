@@ -496,7 +496,10 @@
 
                 <!-- Quick Bill Sidebar -->
                 <aside class="bill-sidebar">
-                    <h3>Current Bill</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h3 style="margin: 0;">Current Bill</h3>
+                        <button id="connect-printer-btn" class="btn secondary" onclick="connectUSBPrinter()" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">🔌 Connect Printer</button>
+                    </div>
                     <div class="bill-items" id="bill-items-container">
                         <p style="text-align: center; color: #999; padding-top: 2rem;">Click products to add</p>
                     </div>
@@ -650,9 +653,8 @@
     <div id="receipt-print" style="display: none;">
         <div class="receipt-header">
             <h2>COCHIN BAKERS</h2>
-            <p>Ph: +91 2345678909</p>
-            <p>Email: snajdsnd@gmail.com</p>
-            <p>FSSAI: rjfnjfnj | GST: dnejfnejfne</p>
+            <p>Nedumkandam, Padinjarekavala</p>
+            <p>Phone: 8848782373</p>
             <p id="receipt-date" style="margin-top: 2mm; font-weight: bold;"></p>
         </div>
         <table class="receipt-table">
@@ -731,6 +733,7 @@
         </div>
     </div>
 
+    <script src="usb-printer.js"></script>
     <script src="admin.js"></script>
 </body>
 </html>

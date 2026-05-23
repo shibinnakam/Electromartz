@@ -339,6 +339,8 @@ Resources:
             Method: post
             RestApiId:
               Ref: EcomApi
+            Auth:
+              Authorizer: NONE
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
