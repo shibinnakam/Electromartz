@@ -8,7 +8,7 @@ class USBPrinter {
     async connect() {
         try {
             this.device = await navigator.usb.requestDevice({
-                filters: [] // Request all devices, user selects the printer
+                filters: [{}] // Request all devices, user selects the printer
             });
 
             await this.device.open();
