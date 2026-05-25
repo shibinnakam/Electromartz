@@ -736,6 +736,25 @@
         </div>
     </div>
 
+    <div id="custom-print-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px; text-align: center;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem">
+                <h2 style="font-family:'Outfit'; font-size:1.5rem">Print Preview</h2>
+                <button class="btn secondary" onclick="closeCustomPrintModal()" style="padding:0.4rem 0.8rem">×</button>
+            </div>
+            
+            <div id="print-preview-container" style="background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; padding:1.5rem; text-align:left; font-family:'Courier New', Courier, monospace; font-size:0.85rem; height:300px; overflow-y:auto; margin-bottom:1.5rem">
+                <!-- Preview injected here -->
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:0.8rem">
+                <button class="btn primary" onclick="executeBluetoothPrint()" style="width:100%; font-size:1rem; gap:0.5rem">🔵 Print via Bluetooth</button>
+                <button class="btn secondary" onclick="executeBrowserPrint()" style="width:100%; gap:0.5rem">🖨️ Print via Browser (PDF/System)</button>
+                <p style="font-size:0.75rem; color:#6b7280; margin-top:0.5rem">Select your preferred printing method.</p>
+            </div>
+        </div>
+    </div>
+
     <script src="usb-printer.js"></script>
     <script src="admin.js"></script>
 </body>

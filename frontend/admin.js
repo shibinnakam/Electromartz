@@ -516,7 +516,7 @@ window.printReceipt = async () => {
     const receiptDate = document.getElementById('receipt-date');
 
     let total = 0;
-    const itemsForDB = currentBill.map((item, i) => {
+    window.currentItemsForDB = currentBill.map((item, i) => {
         const itemTotal = item.price * item.qty;
         total += itemTotal;
         return {
@@ -526,6 +526,7 @@ window.printReceipt = async () => {
             qty: item.qty
         };
     });
+    window.currentTotalForDB = total;
 
     receiptItems.innerHTML = currentBill.map((item, i) => {
         const itemTotal = item.price * item.qty;
@@ -545,80 +546,79 @@ window.printReceipt = async () => {
     receiptDate.innerText = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     const printArea = document.getElementById('receipt-print');
-    printArea.style.display = 'block';
+    const previewContainer = document.getElementById('print-preview-container');
+    previewContainer.innerHTML = printArea.innerHTML;
+    
+    document.getElementById('custom-print-modal').style.display = 'flex';
+};
 
-    // USB Direct Print Integration
+window.closeCustomPrintModal = () => {
+    document.getElementById('custom-print-modal').style.display = 'none';
+};
+
+window.executeBluetoothPrint = async () => {
     const printerHeaderInfo = {
         address: "Nedumkandam, Padinjarekavala",
         phone: "8848782373"
     };
 
-    if (window.activePrinter) {
-        try {
-            await window.activePrinter.printReceipt({ items: itemsForDB, total: total }, printerHeaderInfo);
-            // If USB print is successful, we don't necessarily need window.print()
-            // but we might still want to call it for record/preview or just skip it.
-            // Let's skip window.print() if USB is connected to avoid double printing.
-            console.log("Printed via WebUSB");
-            
-            // Still need to trigger the cleanup logic (normally in afterprint)
-            setTimeout(() => {
-                printArea.style.display = 'none';
-                currentBill = [];
-                const paidBox = document.getElementById('paid-checkbox');
-                const checkoutBtn = document.getElementById('checkout-btn');
-                if (paidBox) paidBox.checked = false;
-                if (checkoutBtn) {
-                    checkoutBtn.disabled = true;
-                    checkoutBtn.style.opacity = '0.5';
-                    checkoutBtn.style.cursor = 'not-allowed';
-                }
-                updateBillUI();
-            }, 1000);
-
-            // Save order to DB
-            savePOSOrder(itemsForDB, total);
-            return; // Exit function so window.print() is not called
-        } catch (e) {
-            console.error("USB Print failed, falling back to browser print", e);
+    try {
+        if (!window.activePrinter || window.activePrinter !== window.btPrinter) {
+            const connected = await window.btPrinter.connect();
+            if (!connected) return;
         }
+
+        await window.btPrinter.printReceipt({ items: window.currentItemsForDB, total: window.currentTotalForDB }, printerHeaderInfo);
+        console.log("Printed via Bluetooth");
+        
+        finishCheckout();
+    } catch (e) {
+        console.error("Bluetooth Print failed", e);
+        alert("Bluetooth print failed: " + e.message);
     }
+};
 
+window.executeBrowserPrint = () => {
+    const printArea = document.getElementById('receipt-print');
+    
     // Save order to DB
-    savePOSOrder(itemsForDB, total);
+    savePOSOrder(window.currentItemsForDB, window.currentTotalForDB);
 
-    // Use a small delay for mobile browsers to ensure the DOM has updated
+    printArea.style.display = 'block';
+    
     setTimeout(() => {
         window.print();
     }, 250);
 
-    // Clean up after printing
     window.addEventListener('afterprint', () => {
         printArea.style.display = 'none';
-        currentBill = [];
-
-        // Reset Paid checkbox and button
-        const paidBox = document.getElementById('paid-checkbox');
-        const checkoutBtn = document.getElementById('checkout-btn');
-        if (paidBox) paidBox.checked = false;
-        if (checkoutBtn) {
-            checkoutBtn.disabled = true;
-            checkoutBtn.style.opacity = '0.5';
-            checkoutBtn.style.cursor = 'not-allowed';
-        }
-
-        updateBillUI();
+        finishCheckout(false);
     }, { once: true });
 
-    // Fallback for browsers that don't support afterprint well
     setTimeout(() => {
         if (printArea.style.display === 'block') {
             printArea.style.display = 'none';
-            currentBill = [];
-            updateBillUI();
+            finishCheckout(false);
         }
     }, 3000);
 };
+
+function finishCheckout(saveToDB = true) {
+    if (saveToDB) {
+        savePOSOrder(window.currentItemsForDB, window.currentTotalForDB);
+    }
+    closeCustomPrintModal();
+    currentBill = [];
+    const paidBox = document.getElementById('paid-checkbox');
+    const checkoutBtn = document.getElementById('checkout-btn');
+    if (paidBox) paidBox.checked = false;
+    if (checkoutBtn) {
+        checkoutBtn.disabled = true;
+        checkoutBtn.style.opacity = '0.5';
+        checkoutBtn.style.cursor = 'not-allowed';
+    }
+    updateBillUI();
+}
 
 async function savePOSOrder(items, total) {
     try {
