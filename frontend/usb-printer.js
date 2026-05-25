@@ -107,6 +107,24 @@ class BluetoothPrinter extends ThermalPrinter {
 
     async connect() {
         try {
+            // First, try to auto-connect to a previously permitted device without a popup!
+            if (navigator.bluetooth && navigator.bluetooth.getDevices) {
+                const devices = await navigator.bluetooth.getDevices();
+                if (devices.length > 0) {
+                    // Try to use the first previously paired device
+                    for (let d of devices) {
+                        try {
+                            console.log("Attempting auto-connect to:", d.name);
+                            await this.setupDevice(d);
+                            return true;
+                        } catch (e) {
+                            console.warn("Auto-connect failed for", d.name, e);
+                        }
+                    }
+                }
+            }
+
+            // If auto-connect fails or no devices permitted, show the prompt
             this.device = await navigator.bluetooth.requestDevice({
                 acceptAllDevices: true,
                 optionalServices: [
@@ -115,27 +133,42 @@ class BluetoothPrinter extends ThermalPrinter {
                     '49535343-fe7d-4ae5-8fa9-9fafd205e455'
                 ]
             });
-            console.log("Found bluetooth device:", this.device.name);
-            this.server = await this.device.gatt.connect();
-            console.log("Connected to GATT Server");
+            await this.setupDevice(this.device);
+            return true;
 
-            const services = await this.server.getPrimaryServices();
-            for (const service of services) {
-                const characteristics = await service.getCharacteristics();
-                for (const char of characteristics) {
-                    if (char.properties.write || char.properties.writeWithoutResponse) {
-                        this.characteristic = char;
-                        console.log("Found write characteristic:", char.uuid);
-                        window.activePrinter = this;
-                        return true;
-                    }
-                }
-            }
-            throw new Error("No writable characteristic found on this Bluetooth device.");
         } catch (error) {
             console.error("Bluetooth connection failed:", error);
             return false;
         }
+    }
+
+    async setupDevice(device) {
+        this.device = device;
+        console.log("Found bluetooth device:", this.device.name);
+        
+        // Listen for disconnects
+        this.device.addEventListener('gattserverdisconnected', () => {
+            console.log("Printer disconnected! Attempting reconnect in 2s...");
+            window.activePrinter = null;
+            // Provide a visual cue or auto reconnect could go here
+        });
+
+        this.server = await this.device.gatt.connect();
+        console.log("Connected to GATT Server");
+
+        const services = await this.server.getPrimaryServices();
+        for (const service of services) {
+            const characteristics = await service.getCharacteristics();
+            for (const char of characteristics) {
+                if (char.properties.write || char.properties.writeWithoutResponse) {
+                    this.characteristic = char;
+                    console.log("Found write characteristic:", char.uuid);
+                    window.activePrinter = this;
+                    return;
+                }
+            }
+        }
+        throw new Error("No writable characteristic found on this Bluetooth device.");
     }
 
     async print(data) {
@@ -143,9 +176,9 @@ class BluetoothPrinter extends ThermalPrinter {
             throw new Error("Bluetooth Printer not connected");
         }
         
-        // Bluetooth LE typically limits writes to 20-512 bytes. 
-        // 50 bytes with a delay is highly reliable for generic Chinese POS thermal printers.
-        const chunkSize = 50; 
+        // Strict 20-byte BLE chunking for maximum compatibility with all devices
+        // Some older Android BLE stacks drop anything larger than 20 bytes silently.
+        const chunkSize = 20; 
         for (let i = 0; i < data.length; i += chunkSize) {
             const chunk = data.slice(i, i + chunkSize);
             try {
@@ -153,10 +186,12 @@ class BluetoothPrinter extends ThermalPrinter {
                     await this.characteristic.writeValueWithoutResponse(chunk);
                 } else if (this.characteristic.properties.write) {
                     await this.characteristic.writeValueWithResponse(chunk);
+                } else if (typeof this.characteristic.writeValue === 'function') {
+                    await this.characteristic.writeValue(chunk);
                 }
                 
-                // Allow the printer's tiny hardware buffer to process the BLE packet
-                await new Promise(r => setTimeout(r, 20)); 
+                // 50ms delay gives the printer time to burn the paper and clear buffers
+                await new Promise(r => setTimeout(r, 50)); 
             } catch (e) {
                 console.warn("BT Write Warning chunk " + i + ":", e);
             }
