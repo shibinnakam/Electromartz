@@ -544,6 +544,7 @@ window.printReceipt = async () => {
     const now = new Date();
     receiptDate.innerText = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+    const printArea = document.getElementById('receipt-print');
     printArea.style.display = 'block';
 
     // USB Direct Print Integration
