@@ -143,19 +143,22 @@ class BluetoothPrinter extends ThermalPrinter {
             throw new Error("Bluetooth Printer not connected");
         }
         
-        // Bluetooth LE limits writes to 512 bytes (or sometimes 20 bytes). We should chunk it.
-        const chunkSize = 100;
+        // Bluetooth LE typically limits writes to 20-512 bytes. 
+        // 50 bytes with a delay is highly reliable for generic Chinese POS thermal printers.
+        const chunkSize = 50; 
         for (let i = 0; i < data.length; i += chunkSize) {
             const chunk = data.slice(i, i + chunkSize);
             try {
-                if (this.characteristic.properties.write) {
-                    await this.characteristic.writeValueWithResponse(chunk);
-                } else {
+                if (this.characteristic.properties.writeWithoutResponse) {
                     await this.characteristic.writeValueWithoutResponse(chunk);
+                } else if (this.characteristic.properties.write) {
+                    await this.characteristic.writeValueWithResponse(chunk);
                 }
+                
+                // Allow the printer's tiny hardware buffer to process the BLE packet
+                await new Promise(r => setTimeout(r, 20)); 
             } catch (e) {
-                // Ignore small chunk errors as Some printers drop responses but still print
-                console.warn("BT Write Warning:", e);
+                console.warn("BT Write Warning chunk " + i + ":", e);
             }
         }
     }
