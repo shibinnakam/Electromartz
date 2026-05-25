@@ -1,40 +1,6 @@
-class USBPrinter {
+class ThermalPrinter {
     constructor() {
-        this.device = null;
-        this.endpoint = null;
         this.encoder = new TextEncoder();
-    }
-
-    async connect() {
-        try {
-            this.device = await navigator.usb.requestDevice({
-                filters: [{}] // Request all devices, user selects the printer
-            });
-
-            await this.device.open();
-            await this.device.selectConfiguration(1);
-            
-            // Find the first interface with a bulk OUT endpoint
-            const iface = this.device.configuration.interfaces[0];
-            await this.device.claimInterface(iface.interfaceNumber);
-
-            const endpoint = iface.alternate.endpoints.find(e => e.direction === 'out' && e.type === 'bulk');
-            if (!endpoint) throw new Error("No output endpoint found");
-            
-            this.endpoint = endpoint.endpointNumber;
-            console.log("Printer connected at endpoint:", this.endpoint);
-            return true;
-        } catch (error) {
-            console.error("Connection failed:", error);
-            return false;
-        }
-    }
-
-    async print(data) {
-        if (!this.device || !this.endpoint) {
-            throw new Error("Printer not connected");
-        }
-        await this.device.transferOut(this.endpoint, data);
     }
 
     // ESC/POS Command Generators
@@ -90,4 +56,111 @@ class USBPrinter {
     }
 }
 
-window.usbPrinter = new USBPrinter();
+class USBPrinter extends ThermalPrinter {
+    constructor() {
+        super();
+        this.device = null;
+        this.endpoint = null;
+    }
+
+    async connect() {
+        try {
+            this.device = await navigator.usb.requestDevice({
+                filters: [{}] // Request all devices, user selects the printer
+            });
+
+            await this.device.open();
+            await this.device.selectConfiguration(1);
+            
+            // Find the first interface with a bulk OUT endpoint
+            const iface = this.device.configuration.interfaces[0];
+            await this.device.claimInterface(iface.interfaceNumber);
+
+            const endpoint = iface.alternate.endpoints.find(e => e.direction === 'out' && e.type === 'bulk');
+            if (!endpoint) throw new Error("No output endpoint found");
+            
+            this.endpoint = endpoint.endpointNumber;
+            console.log("Printer connected at endpoint:", this.endpoint);
+            window.activePrinter = this;
+            return true;
+        } catch (error) {
+            console.error("Connection failed:", error);
+            return false;
+        }
+    }
+
+    async print(data) {
+        if (!this.device || !this.endpoint) {
+            throw new Error("USB Printer not connected");
+        }
+        await this.device.transferOut(this.endpoint, data);
+    }
+}
+
+class BluetoothPrinter extends ThermalPrinter {
+    constructor() {
+        super();
+        this.device = null;
+        this.server = null;
+        this.characteristic = null;
+    }
+
+    async connect() {
+        try {
+            this.device = await navigator.bluetooth.requestDevice({
+                acceptAllDevices: true,
+                optionalServices: [
+                    '000018f0-0000-1000-8000-00805f9b34fb',
+                    'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
+                    '49535343-fe7d-4ae5-8fa9-9fafd205e455'
+                ]
+            });
+            console.log("Found bluetooth device:", this.device.name);
+            this.server = await this.device.gatt.connect();
+            console.log("Connected to GATT Server");
+
+            const services = await this.server.getPrimaryServices();
+            for (const service of services) {
+                const characteristics = await service.getCharacteristics();
+                for (const char of characteristics) {
+                    if (char.properties.write || char.properties.writeWithoutResponse) {
+                        this.characteristic = char;
+                        console.log("Found write characteristic:", char.uuid);
+                        window.activePrinter = this;
+                        return true;
+                    }
+                }
+            }
+            throw new Error("No writable characteristic found on this Bluetooth device.");
+        } catch (error) {
+            console.error("Bluetooth connection failed:", error);
+            return false;
+        }
+    }
+
+    async print(data) {
+        if (!this.characteristic) {
+            throw new Error("Bluetooth Printer not connected");
+        }
+        
+        // Bluetooth LE limits writes to 512 bytes (or sometimes 20 bytes). We should chunk it.
+        const chunkSize = 100;
+        for (let i = 0; i < data.length; i += chunkSize) {
+            const chunk = data.slice(i, i + chunkSize);
+            try {
+                if (this.characteristic.properties.write) {
+                    await this.characteristic.writeValueWithResponse(chunk);
+                } else {
+                    await this.characteristic.writeValueWithoutResponse(chunk);
+                }
+            } catch (e) {
+                // Ignore small chunk errors as Some printers drop responses but still print
+                console.warn("BT Write Warning:", e);
+            }
+        }
+    }
+
+}
+
+// Set a global window object point for active printer
+window.activePrinter = null;

@@ -498,7 +498,10 @@
                 <aside class="bill-sidebar">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                         <h3 style="margin: 0;">Current Bill</h3>
-                        <button id="connect-printer-btn" class="btn secondary" onclick="connectUSBPrinter()" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">🔌 Connect Printer</button>
+                        <div style="display: flex; gap: 0.3rem;">
+                            <button id="connect-printer-btn" class="btn secondary" onclick="connectUSBPrinter()" style="padding: 0.4rem 0.6rem; font-size: 0.70rem;">🔌 USB</button>
+                            <button id="connect-bt-btn" class="btn secondary" onclick="connectBTPrinter()" style="padding: 0.4rem 0.6rem; font-size: 0.70rem;">🔵 BT</button>
+                        </div>
                     </div>
                     <div class="bill-items" id="bill-items-container">
                         <p style="text-align: center; color: #999; padding-top: 2rem;">Click products to add</p>

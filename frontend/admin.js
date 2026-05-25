@@ -310,16 +310,32 @@ function setupEventListeners() {
     });
 }
 
+window.usbPrinter = new USBPrinter();
+window.btPrinter = new BluetoothPrinter();
+
 window.connectUSBPrinter = async () => {
     const btn = document.getElementById('connect-printer-btn');
     const connected = await window.usbPrinter.connect();
     if (connected) {
-        btn.innerText = "✅ Printer Online";
+        btn.innerText = "✅ USB On";
         btn.classList.add('success');
         btn.style.background = "#10B981";
         btn.style.color = "#fff";
     } else {
-        alert("Failed to connect printer. Make sure it is plugged in and you select it in the popup.");
+        alert("Failed to connect USB printer.");
+    }
+};
+
+window.connectBTPrinter = async () => {
+    const btn = document.getElementById('connect-bt-btn');
+    const connected = await window.btPrinter.connect();
+    if (connected) {
+        btn.innerText = "✅ BT On";
+        btn.classList.add('success');
+        btn.style.background = "#10B981";
+        btn.style.color = "#fff";
+    } else {
+        alert("Failed to connect Bluetooth printer. Ensure Bluetooth is on, location permissions are granted, and device is paired or visible.");
     }
 };
 
@@ -536,9 +552,9 @@ window.printReceipt = async () => {
         phone: "8848782373"
     };
 
-    if (window.usbPrinter && window.usbPrinter.device) {
+    if (window.activePrinter) {
         try {
-            await window.usbPrinter.printReceipt({ items: itemsForDB, total: total }, printerHeaderInfo);
+            await window.activePrinter.printReceipt({ items: itemsForDB, total: total }, printerHeaderInfo);
             // If USB print is successful, we don't necessarily need window.print()
             // but we might still want to call it for record/preview or just skip it.
             // Let's skip window.print() if USB is connected to avoid double printing.
