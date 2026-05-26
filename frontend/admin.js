@@ -10,6 +10,7 @@ let products = [];
 let categories = [];
 let orders = [];
 let currentBill = [];
+let savedBills = JSON.parse(localStorage.getItem('savedBills')) || [];
 let currentUser = null;
 
 const poolData = {
@@ -362,8 +363,12 @@ window.switchTab = (tabId) => {
     }
     if (tabId === 'categories-tab') links[3].classList.add('active');
     if (tabId === 'orders-tab') links[4].classList.add('active');
-    if (tabId === 'sales-report-tab') {
+    if (tabId === 'pending-bills-tab') {
         links[5].classList.add('active');
+        renderPendingBills();
+    }
+    if (tabId === 'sales-report-tab') {
+        links[6].classList.add('active');
         renderSalesReport();
     }
 };
@@ -504,6 +509,87 @@ window.removeFromBill = (index) => {
     currentBill.splice(index, 1);
     updateBillUI();
 };
+
+window.saveBillForLater = () => {
+    if (currentBill.length === 0) {
+        alert("Cannot save an empty bill.");
+        return;
+    }
+    
+    let total = 0;
+    const items = currentBill.map(item => {
+        total += item.price * item.qty;
+        return {
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            qty: item.qty
+        };
+    });
+
+    const newBill = {
+        id: 'B-' + Date.now(),
+        items,
+        totalAmount: total,
+        createdAt: new Date().toISOString()
+    };
+
+    savedBills.push(newBill);
+    localStorage.setItem('savedBills', JSON.stringify(savedBills));
+    alert("Bill saved for later.");
+    
+    currentBill = [];
+    updateBillUI();
+};
+
+window.renderPendingBills = () => {
+    const list = document.getElementById('pending-bills-list');
+    if (!list) return;
+
+    list.innerHTML = savedBills.slice().reverse().map(bill => `
+        <tr>
+            <td><strong>#${bill.id}</strong></td>
+            <td>${bill.items.length} items</td>
+            <td>₹${bill.totalAmount}</td>
+            <td>${new Date(bill.createdAt).toLocaleString()}</td>
+            <td>
+                <button class="action-btn btn-edit" style="background:#EBF5FF; color:#3B82F6" onclick="resumeBill('${bill.id}')">Resume</button>
+                <button class="action-btn btn-delete" style="background:#FEF2F2; color:#EF4444" onclick="deleteSavedBill('${bill.id}')">Delete</button>
+            </td>
+        </tr>
+    `).join('') || '<tr><td colspan="5">No pending bills.</td></tr>';
+};
+
+window.resumeBill = (billId) => {
+    if (currentBill.length > 0) {
+        if (!confirm("Your current POS bill is not empty. Resuming this bill will replace current items. Are you sure?")) return;
+    }
+    
+    const billIndex = savedBills.findIndex(b => b.id === billId);
+    if (billIndex === -1) return;
+    
+    const bill = savedBills[billIndex];
+    // Map items back into currentBill format (they need to match the product structure slightly if possible)
+    // Products structure expects { id, name, price, qty } which we saved, but sometimes needs image.
+    // However, image is only used in POS grid, not the bill sidebar. So it's fine.
+    currentBill = [...bill.items];
+    
+    // Remove from saved bills
+    savedBills.splice(billIndex, 1);
+    localStorage.setItem('savedBills', JSON.stringify(savedBills));
+    
+    switchTab('products-tab');
+    updateBillUI();
+};
+
+window.deleteSavedBill = (billId) => {
+    if (!confirm("Are you sure you want to delete this saved bill?")) return;
+    
+    savedBills = savedBills.filter(b => b.id !== billId);
+    localStorage.setItem('savedBills', JSON.stringify(savedBills));
+    renderPendingBills();
+};
+
 
 window.printReceipt = async () => {
     if (currentBill.length === 0) {

@@ -388,6 +388,7 @@
         <button class="sidebar-link" onclick="switchTab('all-products-tab')">📦 All Products</button>
         <button class="sidebar-link" onclick="switchTab('categories-tab')">📁 Categories</button>
         <button class="sidebar-link" onclick="switchTab('orders-tab')">🧾 Orders</button>
+        <button class="sidebar-link" onclick="switchTab('pending-bills-tab')">⏳ Pending Bills</button>
         <button class="sidebar-link" onclick="switchTab('sales-report-tab')">📊 Sales Report</button>
         <span class="sidebar-label">Account</span>
         <button class="sidebar-link" onclick="handleLogout()">🚪 Logout</button>
@@ -518,7 +519,8 @@
                         <input type="checkbox" id="paid-checkbox" style="width: 18px; height: 18px; accent-color: var(--admin-accent); cursor: pointer;">
                         <label for="paid-checkbox" style="font-size: 0.85rem; font-weight: 700; color: var(--admin-accent); cursor: pointer; user-select: none;">MARK AS PAID</label>
                     </div>
-
+                    
+                    <button id="save-bill-btn" class="btn secondary" onclick="saveBillForLater()" style="width: 100%; margin-bottom: 0.8rem;">Save Bill for Later</button>
                     <button id="checkout-btn" class="btn primary" onclick="printReceipt()" style="width: 100%; opacity: 0.5; cursor: not-allowed;" disabled>Print & Checkout</button>
                 </aside>
             </div>
@@ -567,6 +569,29 @@
                     </tr>
                 </thead>
                 <tbody id="orders-list">
+                    <!-- Data injected by JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <div id="pending-bills-tab" class="tab-content">
+            <div class="dashboard-header">
+                <div>
+                    <h1>Pending Bills</h1>
+                    <p>Review and resume saved bills that are not yet paid.</p>
+                </div>
+            </div>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Bill Reference</th>
+                        <th>Items Count</th>
+                        <th>Amount</th>
+                        <th>Created At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="pending-bills-list">
                     <!-- Data injected by JS -->
                 </tbody>
             </table>
